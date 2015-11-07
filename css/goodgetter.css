@@ -1,0 +1,8 @@
+div.segment-panel {
+}
+
+	div.segment-panel h5 {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}

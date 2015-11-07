@@ -1,0 +1,17 @@
+games = game[]
+
+game = {
+	name: string,
+	segments: segment[]
+}
+
+segment = {
+	name: string,
+	best: duration,
+	goal: duration,
+	history: {
+		recent: duration[],
+		total: duration[]
+	}
+}
+

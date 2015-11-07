@@ -1,0 +1,62 @@
+define practiceable things
+start an attempt on one
+attempt either fails with no time or succeeds with a time
+
+warm-ups are a combination of hard levels and fun levels
+hard levels are probably those with high failure rates
+fun levels are probably those with high success rates
+levels should be able to be starred so they're often included in the warm-up routine
+
+
+￼<11:33:40> "jpnance": maybe a strange question but when you guys are practicing, how do you tend to decide what to practice?
+￼<11:34:49> "jpnance": is it more about practicing new strats that save the most time? more about practicing things you're inconsistent at? more about practicing things that have tripped you up recently?
+￼<11:35:07> "#1 Arne Fangurl": all of those
+￼<11:35:23> "jpnance": i'm dicking around with a little webapp that helps guide my practice sessions so i'm looking for input for what others might want out of it
+￼<11:37:53> "jpnance": like others, i imagine, i sometimes get too much into the habit of practicing shit because it's fun or because i'm already good at it
+￼<11:38:39> "jpnance": so it's kind of nice for The Data to say, "no, dummy, you're already fine at 2-5. go practice 4-4."
+￼<11:45:10> "#1 Arne Fangurl": yeah i agree
+￼<11:45:22> "#1 Arne Fangurl": i pretty much only practice rockless lol
+￼<12:06:29> "Crispy": I would take notes on what I missed in runs and practice those
+￼<12:06:47> "Crispy": as well as levels i deemed "hard"
+￼<12:06:56> "Crispy": such as 6-1 - 6-4
+￼<12:07:23> "Crispy": there were more but i had some levels i focused on
+￼<12:07:31> "Crispy": I tried to focus on late game
+￼<12:07:42> "Crispy": bc it's way more important
+￼<12:08:15> "jpnance": yeah, i think late game practice is pretty common for people who are trying to improve a pretty hardened time and end up resetting a lot early
+￼<12:09:31> "Crispy": honestly, in warpless I was so consistent in w1-w3 towards the end I wouldn't reset before then very often
+￼<12:10:05> "Crispy": but that was just experience and bc i reset previously so often
+￼<12:10:55> "Crispy": being able to get multiple sub 28￼5 w2s in a row was cool
+￼<12:11:00> "Crispy": too bad the game sucked
+￼<12:13:23> "jpnance": what about for warm-ups? any rhyme or reason to what you guys decide to warm up with?
+￼<12:13:50> "jpnance": i personally have a few levels that i want to make sure i warm up with just so a real run isn't the first time i see it that night
+￼<12:14:05> "jpnance": 5-7 is one, for example
+￼<12:15:19> "Crispy": 6-1 - 6-4
+￼<12:15:22> "Crispy": rockless
+￼<12:15:30> "Crispy": 5-7 5-3
+￼<12:15:31> "jpnance": yeah, the aforementioned "hard" levels
+￼<12:15:38> "Crispy": yea
+￼<12:16:21> "jpnance": it's probably more art than science but what defines a "hard" level to you?
+￼<12:18:03> "Crispy": generally just levels that I have had a history of having problems with
+￼<12:18:15> "Crispy": also if i find them fun i warm up with them
+￼<12:18:21> "Crispy": or if they are high input
+￼<12:18:31> "jpnance": gotcha
+￼<12:18:35> "Crispy": like 2-5 is easy imo
+￼<12:18:39> "jpnance": yeah like 2-5 is a level i find fun and don't struggle much with
+￼<12:18:40> "Crispy": but i warm up with it
+￼<12:18:40> "jpnance": yeah haha
+￼<12:18:50> "Crispy": lol
+￼<12:19:07> "jpnance": funny to think about, too, because 2-5 was among the tougher levels for me to learn when i was just starting out
+￼<12:19:26> "Crispy": yea it's hard for newer players bc so much is going on
+￼<12:19:37> "Crispy": but the windows for everything are pretty big
+￼<12:19:50> "Crispy": it's also good practice for movement
+￼<12:19:54> "Crispy": the first screen
+￼<12:19:55> "jpnance": yeah for sure
+￼<12:20:04> "jpnance": lots of left-right jumps
+￼<12:20:08> "Crispy": making sure you don't rub them walls
+￼<12:20:33> "Crispy": i mean if you do the optimized strats you do 0 left-right jumps
+￼<12:20:36> "Crispy": but noone does that
+￼<12:20:39> "jpnance": right
+￼<12:20:40> "Crispy": bc really dumb
+￼<12:20:44> "Crispy": lol
+￼<12:21:05> "Crispy": that shell bounce is really stupid
+￼<12:21:28> "Crispy": i don't even do it in hundo
