@@ -173,7 +173,7 @@ var splits = {
 		'5-3': {
 			name: 'Danger - Icy Conditions Ahead',
 			theory: '2:45.76',
-			time: '2:54.71'
+			time: '2:53.34'
 		},
 		'5-4': {
 			name: 'Sluggy the Unshaven\'s Fort',
@@ -218,7 +218,7 @@ var splits = {
 		'6-4': {
 			name: 'Tap-Tap the Red Nose\'s Fort',
 			theory: '2:42.53',
-			time: '3:04.71'
+			time: '3:01.68'
 		},
 		'6-5': {
 			name: 'The Very Loooooong Cave',
