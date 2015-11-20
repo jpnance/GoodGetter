@@ -53,7 +53,7 @@ var splits = {
 		'2-3': {
 			name: 'What\'s Gusty Taste Like?',
 			theory: '1:21.17',
-			time: '1:25.50'
+			time: '1:23.56'
 		},
 		'2-4': {
 			name: 'Bigger Boo\'s Fort',
@@ -113,7 +113,7 @@ var splits = {
 		'3-7': {
 			name: 'Monkeys\' Favorite Lake',
 			theory: '1:27.96',
-			time: '1:33.03'
+			time: '1:31.83'
 		},
 		'3-8': {
 			name: 'Naval Piranha\'s Castle',
@@ -123,7 +123,7 @@ var splits = {
 		'4-1': {
 			name: 'GO! GO! MARIO!!',
 			theory: '1:36.32',
-			time: '1:42.27'
+			time: '1:41.03'
 		},
 		'4-2': {
 			name: 'The Cave of the Lakitus',
@@ -158,7 +158,7 @@ var splits = {
 		'4-8': {
 			name: 'Hookbill the Koopa\'s Castle',
 			theory: '2:48.58',
-			time: '3:13.10'
+			time: '3:07.30'
 		},
 		'5-1': {
 			name: 'BLIZZARD!!!',
@@ -208,7 +208,7 @@ var splits = {
 		'6-2': {
 			name: 'The Cave of the Bandits',
 			theory: '1:34.91',
-			time: '1:42.96'
+			time: '1:42.54'
 		},
 		'6-3': {
 			name: 'Beware the Spinning Logs',
