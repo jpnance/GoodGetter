@@ -174,17 +174,36 @@ var goodGetter = {
 	bindModalEvents: function() {
 		$('#segment-modal').on('show.bs.modal', function (e) {
 			var $segment = $(e.relatedTarget);
+
+			var gameName = $('body').data('game');
+			var categoryName = $('body').data('category');
 			var segmentName = $segment.data('name');
 
 			$('body').data('segment', segmentName);
 
+			var segment = goodGetter.data[gameName][categoryName][segmentName];
 			var $modal = $(this);
+
 			$modal.find('.modal-title').text(segmentName);
+
+			if (segment.best) {
+				$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
+			}
+			if (segment.average && segment.average.overall) {
+				$modal.find('table.stats tr.average td').text(millisecondsIntoTime(segment.average.overall));
+			}
+			if (segment.average && segment.average.offAverage) {
+				$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
+			}
+			if (segment.average && segment.average.offBest) {
+				$modal.find('table.stats tr.stdevBest td').text(millisecondsIntoTime(segment.average.offBest));
+			}
 		});
 
 		$('#segment-modal').on('hide.bs.modal', function (e) {
 			clearInterval(goodGetter.timer.timerInterval);
 			$('#segment-modal div.timer').html('0.00');
+			$('#segment-modal table.stats tbody tr td').html('--');
 		});
 
 		$('#segment-modal').on('click', '.btn.start', function(e) {
@@ -195,7 +214,7 @@ var goodGetter = {
 				$('#segment-modal div.timer').html(millisecondsIntoTime(Date.now() - goodGetter.timer.started));
 			}, 1);
 
-			$('#segment-modal .modal-footer').removeClass('reset').addClass('started');
+			$('#segment-modal .modal-body .controls').removeClass('reset').addClass('started');
 		}); 
 
 		$('#segment-modal').on('click', '.btn.stop', function(e) {
@@ -204,24 +223,36 @@ var goodGetter = {
 			clearInterval(goodGetter.timer.timerInterval);
 
 			$('#segment-modal div.timer').html(millisecondsIntoTime(goodGetter.timer.stopped - goodGetter.timer.started));
-			$('#segment-modal .modal-footer').removeClass('started').addClass('stopped');
+			$('#segment-modal .modal-body .controls').removeClass('started').addClass('stopped');
 		});
 
 		$('#segment-modal').on('click', '.btn.reset', function(e) {
 			$('#segment-modal div.timer').html('0.00');
-			$('#segment-modal .modal-footer').removeClass('stopped').addClass('reset');
+			$('#segment-modal .modal-body .controls').removeClass('stopped').addClass('reset');
 		});
 
 		$('#segment-modal').on('click', '.btn.success', function(e) {
 			goodGetter.submitSegmentTime({ time: goodGetter.timer.stopped - goodGetter.timer.started });
+			goodGetter.syncStats();
 			goodGetter.saveData();
 			$('#segment-modal button.reset').click();
 		});
 
 		$('#segment-modal').on('click', '.btn.failure', function(e) {
 			goodGetter.submitSegmentTime({ time: null });
+			goodGetter.syncStats();
 			goodGetter.saveData();
 			$('#segment-modal button.reset').click();
+		});
+
+		$('#segment-modal').on('click', '.btn.random', function(e) {
+			$('#segment-modal').modal('hide');
+
+			setTimeout(function() {
+				var $segmentPanels = $('#segments div.segment-panel');
+				$segmentPanels[Math.floor(Math.random() * $segmentPanels.length)].click();
+			}, 500);
+
 		});
 	},
 
@@ -241,10 +272,12 @@ var goodGetter = {
 		goodGetter.bindModalEvents();
 		goodGetter.bindWindowEvents();
 
-		$('body').on('click', '.btn.random', function(e) {
+		$('body').on('click', 'div.row .btn.random', function(e) {
 			var $segmentPanels = $('#segments div.segment-panel');
 			$segmentPanels[Math.floor(Math.random() * $segmentPanels.length)].click();
 		});
+
+		$('#gameDropdown ul li:last a').click();
 	},
 
 	saveData: function() {
@@ -274,7 +307,7 @@ var goodGetter = {
 		}
 	},
 
-	submitSegmentTime(options) {
+	submitSegmentTime: function(options) {
 		var defaults = {
 			game: $('body').data('game'),
 			category: $('body').data('category'),
@@ -298,6 +331,57 @@ var goodGetter = {
 		}
 
 		this.data[game][category][segment].history.push(time);
+	},
+
+	syncStats: function() {
+		for (var gameId in goodGetter.data) {
+			for (var categoryId in goodGetter.data[gameId]) {
+				for (var segmentId in goodGetter.data[gameId][categoryId]) {
+					var segment = goodGetter.data[gameId][categoryId][segmentId];
+
+					delete segment.stdev;
+
+					if (segment.history) {
+						var totalTime = 0;
+						var totalSuccesses = 0;
+						var totalFailures = 0;
+						var averageTime;
+						var timeVarianceOffAverage = 0;
+						var timeVarianceOffBest = 0;
+
+						for (var i in segment.history) {
+							if (segment.history[i] == null) {
+								totalFailures++;
+							}
+							else {
+								totalSuccesses++;
+								totalTime += segment.history[i];
+							}
+
+							if (segment.history[i] != null && segment.history[i] < segment.best) {
+								//console.log('updating ' + segmentId + ' from ' + millisecondsIntoTime(segment.best) + ' to ' + millisecondsIntoTime(segment.history[i]));
+								segment.best = segment.history[i];
+							}
+						}
+
+						if (totalSuccesses > 0) {
+							averageTime = Math.round(totalTime / totalSuccesses);
+							segment.average = { overall: averageTime };
+
+							for (var i in segment.history) {
+								if (segment.history[i] != null) {
+									timeVarianceOffAverage += Math.pow(segment.history[i] - segment.average.overall, 2);
+									timeVarianceOffBest += Math.pow(segment.history[i] - segment.best, 2);
+								}
+							}
+
+							segment.average.offAverage = Math.round(Math.sqrt(timeVarianceOffAverage) / totalSuccesses);
+							segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest) / (totalSuccesses - 1));
+						}
+					}
+				}
+			}
+		}
 	},
 
 	timer: {

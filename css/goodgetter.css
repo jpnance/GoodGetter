@@ -10,19 +10,21 @@ div.segment-panel {
 div#segment-modal {
 }
 
-	div#segment-modal div.timer {
-		font-size: 300%;
+	div#segment-modal div.modal-body {
 	}
+		div#segment-modal div.modal-body div.timer {
+			font-size: 48pt;
+		}
 
-	div#segment-modal div.modal-footer.reset button.btn.stop,
-	div#segment-modal div.modal-footer.reset button.btn.reset,
-	div#segment-modal div.modal-footer.reset button.btn.success,
-	div#segment-modal div.modal-footer.reset button.btn.failure,
-	div#segment-modal div.modal-footer.stopped button.btn.start,
-	div#segment-modal div.modal-footer.stopped button.btn.stop,
-	div#segment-modal div.modal-footer.started button.btn.start,
-	div#segment-modal div.modal-footer.started button.btn.reset,
-	div#segment-modal div.modal-footer.started button.btn.success,
-	div#segment-modal div.modal-footer.started button.btn.failure {
-		display: none;
-	}
+			div#segment-modal div.modal-body div.controls.reset button.btn.stop,
+			div#segment-modal div.modal-body div.controls.reset button.btn.reset,
+			div#segment-modal div.modal-body div.controls.reset button.btn.success,
+			div#segment-modal div.modal-body div.controls.reset button.btn.failure,
+			div#segment-modal div.modal-body div.controls.stopped button.btn.start,
+			div#segment-modal div.modal-body div.controls.stopped button.btn.stop,
+			div#segment-modal div.modal-body div.controls.started button.btn.start,
+			div#segment-modal div.modal-body div.controls.started button.btn.reset,
+			div#segment-modal div.modal-body div.controls.started button.btn.success,
+			div#segment-modal div.modal-body div.controls.started button.btn.failure {
+				display: none;
+			}

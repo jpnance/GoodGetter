@@ -1,3 +1,7 @@
+notes on the modal
+stats on the modal
+undo after quit/finish (just do history.pop())
+
 define practiceable things
 start an attempt on one
 attempt either fails with no time or succeeds with a time

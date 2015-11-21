@@ -51,7 +51,9 @@
 		-->
 
 		<div class="container text-center">
-			<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random</button>
+			<div class="row">
+				<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random Level</button>
+			</div>
 		</div>
 
 		<div id="segments" class="container">
@@ -65,14 +67,52 @@
 						<h4 class="modal-title">Modal title</h4>
 					</div>
 					<div class="modal-body">
-						<div class="timer">0.00</div>
+						<div class="row">
+							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+								<div class="timer text-center">0.00</div>
+								<div class="controls text-center reset">
+									<button type="button" class="btn btn-primary start"><span class="glyphicon glyphicon-play"></span> Start</button>
+									<button type="button" class="btn btn-primary stop"><span class="glyphicon glyphicon-stop"></span> Stop</button>
+									<button type="button" class="btn btn-danger failure"><span class="glyphicon glyphicon-remove"></span> Quit</button>
+									<button type="button" class="btn btn-success success"><span class="glyphicon glyphicon-ok"></span> Finished</button>
+									<button type="button" class="btn btn-warning reset"><span class="glyphicon glyphicon-repeat"></span> Reset</button>
+								</div>
+							</div>
+							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+								<table class="table stats">
+									<thead>
+										<tr>
+											<th class="text-center" colspan="2">Segment Statistics</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr class="best">
+											<th>Best Time</th>
+											<td class="text-right">--</td>
+										</tr>
+										<tr class="average">
+											<th>Average Time</th>
+											<td class="text-right">--</td>
+										</tr>
+										<tr class="goal hidden">
+											<th>Goal</th>
+											<td class="text-right">--</td>
+										</tr>
+										<tr class="stdev text-right">
+											<th>Average Off Average</th>
+											<td class="text-right">--</td>
+										</tr>
+										<tr class="stdevBest text-right">
+											<th>Average Off Best</th>
+											<td class="text-right">--</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
 					</div>
-					<div class="modal-footer reset">
-						<button type="button" class="btn btn-primary start"><span class="glyphicon glyphicon-play"></span> Start</button>
-						<button type="button" class="btn btn-primary stop"><span class="glyphicon glyphicon-stop"></span> Stop</button>
-						<button type="button" class="btn btn-warning reset"><span class="glyphicon glyphicon-repeat"></span> Reset</button>
-						<button type="button" class="btn btn-danger failure"><span class="glyphicon glyphicon-remove"></span> Quit</button>
-						<button type="button" class="btn btn-success success"><span class="glyphicon glyphicon-ok"></span> Finished</button>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random Level</button>
 						<button type="button" class="btn btn-default cancel" data-dismiss="modal">Close</button>
 					</div>
 				</div>
