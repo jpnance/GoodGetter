@@ -14,9 +14,11 @@ SegmentPanel.prototype.toString = function() {
 		panelString += '<h5><strong>' + this.name + '</strong></h5>';
 	}
 
+	/*
 	panelString += '<div class="row"><div class="text-right col-xs-6 col-sm-6 col-md-6 col-lg-6">Best</div><div class="text-right col-xs-4 col-sm-4 col-md-4 col-lg-4">' + millisecondsIntoTime(this.bestTime) + '</div></div>';
 	panelString += '<div class="row"><div class="text-right col-xs-6 col-sm-6 col-md-6 col-lg-6">Goal</div><div class="text-right col-xs-4 col-sm-4 col-md-4 col-lg-4">' + millisecondsIntoTime(this.goalTime) + '</div></div>';
 	panelString += '<div class="row"><div class="text-right col-xs-6 col-sm-6 col-md-6 col-lg-6">Saveable</div><div class="text-right col-xs-4 col-sm-4 col-md-4 col-lg-4">' + millisecondsIntoTime(this.saveableTime) + '</div></div>';
+	*/
 
 	panelString += '</div>';
 
@@ -172,33 +174,7 @@ var goodGetter = {
 	},
 
 	bindModalEvents: function() {
-		$('#segment-modal').on('show.bs.modal', function (e) {
-			var $segment = $(e.relatedTarget);
-
-			var gameName = $('body').data('game');
-			var categoryName = $('body').data('category');
-			var segmentName = $segment.data('name');
-
-			$('body').data('segment', segmentName);
-
-			var segment = goodGetter.data[gameName][categoryName][segmentName];
-			var $modal = $(this);
-
-			$modal.find('.modal-title').text(segmentName);
-
-			if (segment.best) {
-				$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
-			}
-			if (segment.average && segment.average.overall) {
-				$modal.find('table.stats tr.average td').text(millisecondsIntoTime(segment.average.overall));
-			}
-			if (segment.average && segment.average.offAverage) {
-				$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
-			}
-			if (segment.average && segment.average.offBest) {
-				$modal.find('table.stats tr.stdevBest td').text(millisecondsIntoTime(segment.average.offBest));
-			}
-		});
+		$('#segment-modal').on('show.bs.modal', goodGetter.updateModal);
 
 		$('#segment-modal').on('hide.bs.modal', function (e) {
 			clearInterval(goodGetter.timer.timerInterval);
@@ -235,6 +211,7 @@ var goodGetter = {
 			goodGetter.submitSegmentTime({ time: goodGetter.timer.stopped - goodGetter.timer.started });
 			goodGetter.syncStats();
 			goodGetter.saveData();
+			goodGetter.updateModal();
 			$('#segment-modal button.reset').click();
 		});
 
@@ -242,17 +219,17 @@ var goodGetter = {
 			goodGetter.submitSegmentTime({ time: null });
 			goodGetter.syncStats();
 			goodGetter.saveData();
+			goodGetter.updateModal();
 			$('#segment-modal button.reset').click();
 		});
 
 		$('#segment-modal').on('click', '.btn.random', function(e) {
-			$('#segment-modal').modal('hide');
+			var $segmentPanels = $('#segments div.segment-panel');
+			var $segmentPanel = $segmentPanels.eq(Math.floor(Math.random() * $segmentPanels.length));
 
-			setTimeout(function() {
-				var $segmentPanels = $('#segments div.segment-panel');
-				$segmentPanels[Math.floor(Math.random() * $segmentPanels.length)].click();
-			}, 500);
+			$('body').data('segment', $segmentPanel.data('name'));
 
+			goodGetter.updateModal();
 		});
 	},
 
@@ -271,6 +248,11 @@ var goodGetter = {
 		goodGetter.bindDropdownEvents();
 		goodGetter.bindModalEvents();
 		goodGetter.bindWindowEvents();
+
+		$('body').on('click', 'div.segment-panel', function(e) {
+			var $segmentPanel = $(e.currentTarget);
+			$('body').data('segment', $segmentPanel.data('name'));
+		});
 
 		$('body').on('click', 'div.row .btn.random', function(e) {
 			var $segmentPanels = $('#segments div.segment-panel');
@@ -339,8 +321,6 @@ var goodGetter = {
 				for (var segmentId in goodGetter.data[gameId][categoryId]) {
 					var segment = goodGetter.data[gameId][categoryId][segmentId];
 
-					delete segment.stdev;
-
 					if (segment.history) {
 						var totalTime = 0;
 						var totalSuccesses = 0;
@@ -358,7 +338,7 @@ var goodGetter = {
 								totalTime += segment.history[i];
 							}
 
-							if (segment.history[i] != null && segment.history[i] < segment.best) {
+							if (segment.history[i] != null && (!segment.best || segment.history[i] < segment.best)) {
 								//console.log('updating ' + segmentId + ' from ' + millisecondsIntoTime(segment.best) + ' to ' + millisecondsIntoTime(segment.history[i]));
 								segment.best = segment.history[i];
 							}
@@ -389,6 +369,30 @@ var goodGetter = {
 		stopped: null,
 		timerInterval: null,
 	},
+
+	updateModal: function() {
+		var gameName = $('body').data('game');
+		var categoryName = $('body').data('category');
+		var segmentName = $('body').data('segment');
+
+		var segment = goodGetter.data[gameName][categoryName][segmentName];
+		var $modal = $('#segment-modal');
+
+		$modal.find('.modal-title').text(segmentName);
+
+		if (segment.best) {
+			$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
+		}
+		if (segment.average && segment.average.overall) {
+			$modal.find('table.stats tr.average td').text(millisecondsIntoTime(segment.average.overall));
+		}
+		if (segment.average && segment.average.offAverage) {
+			$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
+		}
+		if (segment.average && segment.average.offBest) {
+			$modal.find('table.stats tr.stdevBest td').text(millisecondsIntoTime(segment.average.offBest));
+		}
+	}
 };
 
 $(document).ready(goodGetter.init);
