@@ -383,14 +383,29 @@ var goodGetter = {
 		if (segment.best) {
 			$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
 		}
+		else {
+			$modal.find('table.stats tr.best td').text('--');
+		}
+
 		if (segment.average && segment.average.overall) {
 			$modal.find('table.stats tr.average td').text(millisecondsIntoTime(segment.average.overall));
 		}
+		else {
+			$modal.find('table.stats tr.average td').text('--');
+		}
+
 		if (segment.average && segment.average.offAverage) {
 			$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
 		}
+		else {
+			$modal.find('table.stats tr.stdev td').text('--');
+		}
+
 		if (segment.average && segment.average.offBest) {
 			$modal.find('table.stats tr.stdevBest td').text(millisecondsIntoTime(segment.average.offBest));
+		}
+		else {
+			$modal.find('table.stats tr.stdevBest td').text('--');
 		}
 	}
 };
