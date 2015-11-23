@@ -361,6 +361,8 @@ var goodGetter = {
 								segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest / (totalSuccesses - 1)));
 							}
 						}
+
+						segment.failureRate = totalFailures / (totalFailures + totalSuccesses);
 					}
 				}
 			}
@@ -409,6 +411,13 @@ var goodGetter = {
 		}
 		else {
 			$modal.find('table.stats tr.stdevBest td').text('--');
+		}
+
+		if (segment.failureRate || segment.failureRate == 0) {
+			$modal.find('table.stats tr.failure td').text(Math.round(segment.failureRate * 100) + '%');
+		}
+		else {
+			$modal.find('table.stats tr.failure td').text('--');
 		}
 	}
 };
