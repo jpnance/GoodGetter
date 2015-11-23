@@ -50,11 +50,13 @@
 		</div>
 		-->
 
+		<!--
 		<div class="container text-center">
 			<div class="row">
 				<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random Level</button>
 			</div>
 		</div>
+		-->
 
 		<div id="segments" class="container">
 		</div>
@@ -70,7 +72,7 @@
 						<div class="row">
 							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
 								<div class="timer text-center">0.00</div>
-								<div class="controls text-center reset">
+								<div class="timer-controls text-center reset">
 									<button type="button" class="btn btn-primary start"><span class="glyphicon glyphicon-play"></span> Start</button>
 									<button type="button" class="btn btn-primary stop"><span class="glyphicon glyphicon-stop"></span> Stop</button>
 									<button type="button" class="btn btn-danger failure"><span class="glyphicon glyphicon-remove"></span> Quit</button>
@@ -114,9 +116,13 @@
 								</table>
 							</div>
 						</div>
+						<div class="segment-controls row text-center">
+							<button type="button" class="btn btn-info previous"><span class="glyphicon glyphicon-chevron-left"></span> Previous</button>
+							<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random</button>
+							<button type="button" class="btn btn-info next">Next <span class="glyphicon glyphicon-chevron-right"></span></button>
+						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random Level</button>
 						<button type="button" class="btn btn-default cancel" data-dismiss="modal">Close</button>
 					</div>
 				</div>

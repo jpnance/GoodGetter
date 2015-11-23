@@ -173,6 +173,84 @@ var goodGetter = {
 		});
 	},
 
+	bindKeyEvents: function() {
+		$('body').keydown(function(e) {
+			//console.log(e);
+
+			if ($('body').hasClass('modal-open')) {
+				if ($('#segment-modal div.timer-controls').hasClass('reset')) {
+					/* from the timer reset state... */
+					switch (e.keyCode) {
+						case 32: /* ...spacebar is for starting the timer */
+							$('#segment-modal div.timer-controls .btn.start').click();
+							break;
+
+						case 37: /* ...left-arrow is for going to the previous segment */
+							$('#segment-modal div.segment-controls .btn.previous').click();
+							break;
+
+						case 39: /* ...right-arrow is for going to the next segment */
+							$('#segment-modal div.segment-controls .btn.next').click();
+							break;
+
+						case 191: /* ...question mark is for going to a random segment */
+							if (e.shiftKey) {
+								$('#segment-modal div.segment-controls .btn.random').click();
+							}
+							break;
+
+						default:
+							break;
+					}
+
+				}
+				else if ($('#segment-modal div.timer-controls').hasClass('started')) {
+					/* from the timer-started state... */
+					switch (e.keyCode) {
+						case 32: /* ...spacebar is for stopping the timer */
+							$('#segment-modal div.timer-controls .btn.stop').click();
+							break;
+
+						default: break;
+					}
+				}
+				else if ($('#segment-modal div.timer-controls').hasClass('stopped')) {
+					/* from the timer-stopped state... */
+					switch (e.keyCode) {
+						case 70: /* ...f is for saving a finished run */
+							$('#segment-modal div.timer-controls .btn.success').click();
+							break;
+
+						case 81: /* ...q is for saving an aborted run */
+							$('#segment-modal div.timer-controls .btn.failure').click();
+							break;
+
+						case 82: /* ...r is for resetting the timer without saving anything */
+							$('#segment-modal div.timer-controls .btn.reset').click();
+							break;
+
+						default:
+							break;
+					}
+				}
+
+			}
+			else if (!$('body').hasClass('modal-open')) {
+				switch (e.keyCode) {
+					case 191: /* ...question mark is for going to a random segment */
+						if (e.shiftKey) {
+							var $segmentPanels = $('#segments div.segment-panel');
+							$segmentPanels[Math.floor(Math.random() * $segmentPanels.length)].click();
+						}
+						break;
+
+					default:
+						break;
+				}
+			}
+		});
+	},
+
 	bindModalEvents: function() {
 		$('#segment-modal').on('show.bs.modal', goodGetter.updateModal);
 
@@ -190,7 +268,7 @@ var goodGetter = {
 				$('#segment-modal div.timer').html(millisecondsIntoTime(Date.now() - goodGetter.timer.started));
 			}, 1);
 
-			$('#segment-modal .modal-body .controls').removeClass('reset').addClass('started');
+			$('#segment-modal .modal-body .timer-controls').removeClass('reset').addClass('started');
 		}); 
 
 		$('#segment-modal').on('click', '.btn.stop', function(e) {
@@ -199,12 +277,12 @@ var goodGetter = {
 			clearInterval(goodGetter.timer.timerInterval);
 
 			$('#segment-modal div.timer').html(millisecondsIntoTime(goodGetter.timer.stopped - goodGetter.timer.started));
-			$('#segment-modal .modal-body .controls').removeClass('started').addClass('stopped');
+			$('#segment-modal .modal-body .timer-controls').removeClass('started').addClass('stopped');
 		});
 
 		$('#segment-modal').on('click', '.btn.reset', function(e) {
 			$('#segment-modal div.timer').html('0.00');
-			$('#segment-modal .modal-body .controls').removeClass('stopped').addClass('reset');
+			$('#segment-modal .modal-body .timer-controls').removeClass('stopped').addClass('reset');
 		});
 
 		$('#segment-modal').on('click', '.btn.success', function(e) {
@@ -223,6 +301,21 @@ var goodGetter = {
 			$('#segment-modal button.reset').click();
 		});
 
+		$('#segment-modal').on('click', '.btn.previous', function(e) {
+			var $segmentPanels = $('#segments div.segment-panel');
+
+			for (var i = 0; i < $segmentPanels.length; i++) {
+				var $this = $segmentPanels.eq(i);
+
+				if ($this.data('name') == $('body').data('segment')) {
+					$('body').data('segment', $this.prev().data('name'));
+					goodGetter.updateModal();
+
+					break;
+				}
+			}
+		});
+
 		$('#segment-modal').on('click', '.btn.random', function(e) {
 			var $segmentPanels = $('#segments div.segment-panel');
 			var $segmentPanel = $segmentPanels.eq(Math.floor(Math.random() * $segmentPanels.length));
@@ -230,6 +323,21 @@ var goodGetter = {
 			$('body').data('segment', $segmentPanel.data('name'));
 
 			goodGetter.updateModal();
+		});
+
+		$('#segment-modal').on('click', '.btn.next', function(e) {
+			var $segmentPanels = $('#segments div.segment-panel');
+
+			for (var i = 0; i < $segmentPanels.length; i++) {
+				var $this = $segmentPanels.eq(i);
+
+				if ($this.data('name') == $('body').data('segment')) {
+					$('body').data('segment', $this.next().data('name'));
+					goodGetter.updateModal();
+
+					break;
+				}
+			}
 		});
 	},
 
@@ -246,6 +354,7 @@ var goodGetter = {
 	init: function() {
 		goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: Object.keys(goodGetter.data) });
 		goodGetter.bindDropdownEvents();
+		goodGetter.bindKeyEvents();
 		goodGetter.bindModalEvents();
 		goodGetter.bindWindowEvents();
 
@@ -254,10 +363,12 @@ var goodGetter = {
 			$('body').data('segment', $segmentPanel.data('name'));
 		});
 
+		/*
 		$('body').on('click', 'div.row .btn.random', function(e) {
 			var $segmentPanels = $('#segments div.segment-panel');
 			$segmentPanels[Math.floor(Math.random() * $segmentPanels.length)].click();
 		});
+		*/
 
 		$('#gameDropdown ul li:last a').click();
 	},
