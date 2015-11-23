@@ -355,8 +355,11 @@ var goodGetter = {
 								}
 							}
 
-							segment.average.offAverage = Math.round(Math.sqrt(timeVarianceOffAverage) / totalSuccesses);
-							segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest) / (totalSuccesses - 1));
+							segment.average.offAverage = Math.round(Math.sqrt(timeVarianceOffAverage / totalSuccesses));
+
+							if (totalSuccesses > 1) {
+								segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest / (totalSuccesses - 1)));
+							}
 						}
 					}
 				}
