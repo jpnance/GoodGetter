@@ -278,6 +278,7 @@ var goodGetter = {
 
 		$('#segment-modal').on('hide.bs.modal', function (e) {
 			clearInterval(goodGetter.timer.timerInterval);
+			$('#segment-modal button.reset').click();
 			$('#segment-modal div.timer').html('0.00');
 			$('#segment-modal table.stats tbody tr td').html('--');
 		});
