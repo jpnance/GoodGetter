@@ -182,19 +182,23 @@ var goodGetter = {
 					/* from the timer reset state... */
 					switch (e.keyCode) {
 						case 32: /* ...spacebar is for starting the timer */
+							e.preventDefault();
 							$('#segment-modal div.timer-controls .btn.start').click();
 							break;
 
 						case 37: /* ...left-arrow is for going to the previous segment */
+							e.preventDefault();
 							$('#segment-modal div.segment-controls .btn.previous').click();
 							break;
 
 						case 39: /* ...right-arrow is for going to the next segment */
+							e.preventDefault();
 							$('#segment-modal div.segment-controls .btn.next').click();
 							break;
 
 						case 191: /* ...question mark is for going to a random segment */
 							if (e.shiftKey) {
+								e.preventDefault();
 								$('#segment-modal div.segment-controls .btn.random').click();
 							}
 							break;
@@ -208,6 +212,7 @@ var goodGetter = {
 					/* from the timer-started state... */
 					switch (e.keyCode) {
 						case 32: /* ...spacebar is for stopping the timer */
+							e.preventDefault();
 							$('#segment-modal div.timer-controls .btn.stop').click();
 							break;
 
@@ -218,14 +223,17 @@ var goodGetter = {
 					/* from the timer-stopped state... */
 					switch (e.keyCode) {
 						case 70: /* ...f is for saving a finished run */
+							e.preventDefault();
 							$('#segment-modal div.timer-controls .btn.success').click();
 							break;
 
 						case 81: /* ...q is for saving an aborted run */
+							e.preventDefault();
 							$('#segment-modal div.timer-controls .btn.failure').click();
 							break;
 
 						case 82: /* ...r is for resetting the timer without saving anything */
+							e.preventDefault();
 							$('#segment-modal div.timer-controls .btn.reset').click();
 							break;
 
@@ -302,7 +310,10 @@ var goodGetter = {
 		});
 
 		$('#segment-modal').on('click', '.btn.previous', function(e) {
+			var $this = $(e.target);
 			var $segmentPanels = $('#segments div.segment-panel');
+
+			$this.blur();
 
 			for (var i = 0; i < $segmentPanels.length; i++) {
 				var $this = $segmentPanels.eq(i);
@@ -314,19 +325,25 @@ var goodGetter = {
 					break;
 				}
 			}
+
 		});
 
 		$('#segment-modal').on('click', '.btn.random', function(e) {
+			var $this = $(e.target);
 			var $segmentPanels = $('#segments div.segment-panel');
 			var $segmentPanel = $segmentPanels.eq(Math.floor(Math.random() * $segmentPanels.length));
 
+			$this.blur();
 			$('body').data('segment', $segmentPanel.data('name'));
 
 			goodGetter.updateModal();
 		});
 
 		$('#segment-modal').on('click', '.btn.next', function(e) {
+			var $this = $(e.target);
 			var $segmentPanels = $('#segments div.segment-panel');
+
+			$this.blur();
 
 			for (var i = 0; i < $segmentPanels.length; i++) {
 				var $this = $segmentPanels.eq(i);
