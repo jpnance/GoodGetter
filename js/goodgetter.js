@@ -471,6 +471,7 @@ var goodGetter = {
 						var averageTime;
 						var timeVarianceOffAverage = 0;
 						var timeVarianceOffBest = 0;
+						var timeVarianceOffMedian = 0;
 
 						for (var i in segment.history) {
 							if (segment.history[i] == null) {
@@ -481,13 +482,36 @@ var goodGetter = {
 								totalTime += segment.history[i];
 							}
 
-							if (segment.history[i] != null && (!segment.best || segment.history[i] < segment.best)) {
+							if (segment.history[i] != null && (!segment.best || segment.history.indexOf(segment.best) == -1 || segment.history[i] < segment.best)) {
 								//console.log('updating ' + segmentId + ' from ' + millisecondsIntoTime(segment.best) + ' to ' + millisecondsIntoTime(segment.history[i]));
 								segment.best = segment.history[i];
 							}
 						}
 
 						if (totalSuccesses > 0) {
+							var sortedSuccesses = [];
+
+							for (var i in segment.history) {
+								if (segment.history[i] != null) {
+									sortedSuccesses.push(segment.history[i]);
+								}
+							}
+
+							sortedSuccesses.sort(function(a, b) {
+								return a - b
+							});
+
+							var middle = Math.floor(sortedSuccesses.length / 2);
+
+							if (sortedSuccesses.length % 2 == 0) {
+								var median = Math.round((sortedSuccesses[middle - 1] + sortedSuccesses[middle]) / 2);
+
+								segment.median = median;
+							}
+							else {
+								segment.median = sortedSuccesses[middle];
+							}
+
 							averageTime = Math.round(totalTime / totalSuccesses);
 							segment.average = { overall: averageTime };
 
@@ -495,6 +519,7 @@ var goodGetter = {
 								if (segment.history[i] != null) {
 									timeVarianceOffAverage += Math.pow(segment.history[i] - segment.average.overall, 2);
 									timeVarianceOffBest += Math.pow(segment.history[i] - segment.best, 2);
+									timeVarianceOffMedian += Math.pow(segment.history[i] - segment.median, 2);
 								}
 							}
 
@@ -502,6 +527,13 @@ var goodGetter = {
 
 							if (totalSuccesses > 1) {
 								segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest / (totalSuccesses - 1)));
+							}
+
+							if (totalSuccesses % 2 == 0) {
+								segment.average.offMedian = Math.round(Math.sqrt(timeVarianceOffMedian / (totalSuccesses - 1)));
+							}
+							else {
+								segment.average.offMedian = Math.round(Math.sqrt(timeVarianceOffMedian / totalSuccesses));
 							}
 						}
 
@@ -554,6 +586,13 @@ var goodGetter = {
 		}
 		else {
 			$modal.find('table.stats tr.stdevBest td').text('--');
+		}
+
+		if (segment.average && segment.average.offMedian) {
+			$modal.find('table.stats tr.stdevMedian td').text(millisecondsIntoTime(segment.average.offMedian));
+		}
+		else {
+			$modal.find('table.stats tr.stdevMedian td').text('--');
 		}
 
 		if (segment.failureRate || segment.failureRate == 0) {
