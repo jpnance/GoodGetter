@@ -574,6 +574,13 @@ var goodGetter = {
 			$modal.find('table.stats tr.average td').text('--');
 		}
 
+		if (segment.median) {
+			$modal.find('table.stats tr.median td').text(millisecondsIntoTime(segment.median));
+		}
+		else {
+			$modal.find('table.stats tr.median td').text('--');
+		}
+
 		if (segment.average && segment.average.offAverage) {
 			$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
 		}
