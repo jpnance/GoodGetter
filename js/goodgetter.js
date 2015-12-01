@@ -577,6 +577,13 @@ var goodGetter = {
 			$modal.find('table.distribution tr.quartiles td.first-quartile').text(millisecondsIntoTime(segment.distribution.firstQuartile));
 			$modal.find('table.distribution tr.quartiles td.worst').text(millisecondsIntoTime(segment.distribution.worst));
 		}
+		else {
+			$modal.find('table.distribution tr.quartiles td.best').text('--');
+			$modal.find('table.distribution tr.quartiles td.third-quartile').text('--');
+			$modal.find('table.distribution tr.quartiles td.second-quartile').text('--');
+			$modal.find('table.distribution tr.quartiles td.first-quartile').text('--');
+			$modal.find('table.distribution tr.quartiles td.worst').text('--');
+		}
 
 		if (segment.best) {
 			$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
