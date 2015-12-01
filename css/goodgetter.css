@@ -28,3 +28,7 @@ div#segment-modal {
 			div#segment-modal div.modal-body div.timer-controls.started button.btn.failure {
 				display: none;
 			}
+
+		div#segment-modal div.modal-body table {
+			font-size: 80%;
+		}
