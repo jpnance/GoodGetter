@@ -498,7 +498,7 @@ var goodGetter = {
 							}
 
 							sortedSuccesses.sort(function(a, b) {
-								return a - b
+								return a < b
 							});
 
 							var middle = Math.floor(sortedSuccesses.length / 2);
@@ -535,6 +535,16 @@ var goodGetter = {
 							else {
 								segment.average.offMedian = Math.round(Math.sqrt(timeVarianceOffMedian / totalSuccesses));
 							}
+
+							var interval = 1 / sortedSuccesses.length;
+							segment.distribution = {
+								best: sortedSuccesses[sortedSuccesses.length - 1],
+								thirdQuartile: sortedSuccesses[Math.ceil(.75 / interval) - 1],
+								secondQuartile: sortedSuccesses[Math.ceil(.50 / interval) - 1],
+								firstQuartile: sortedSuccesses[Math.ceil(.25 / interval) - 1],
+								worst: sortedSuccesses[0]
+							};
+
 						}
 
 						segment.failureRate = totalFailures / (totalFailures + totalSuccesses);
@@ -559,6 +569,14 @@ var goodGetter = {
 		var $modal = $('#segment-modal');
 
 		$modal.find('.modal-title').text(segmentName);
+
+		if (segment.distribution) {
+			$modal.find('table.distribution tr.quartiles td.best').text(millisecondsIntoTime(segment.distribution.best));
+			$modal.find('table.distribution tr.quartiles td.third-quartile').text(millisecondsIntoTime(segment.distribution.thirdQuartile));
+			$modal.find('table.distribution tr.quartiles td.second-quartile').text(millisecondsIntoTime(segment.distribution.secondQuartile));
+			$modal.find('table.distribution tr.quartiles td.first-quartile').text(millisecondsIntoTime(segment.distribution.firstQuartile));
+			$modal.find('table.distribution tr.quartiles td.worst').text(millisecondsIntoTime(segment.distribution.worst));
+		}
 
 		if (segment.best) {
 			$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
