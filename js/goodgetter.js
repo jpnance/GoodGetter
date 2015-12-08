@@ -410,6 +410,18 @@ var goodGetter = {
 	},
 
 	showSegmentPanels: function(options) {
+		var defaults = {
+			game: $('body').data('game'),
+			category: $('body').data('category'),
+			sortBy: 'practice'
+		};
+
+		var options = {
+			game: options && options.game ? options.game : defaults.game,
+			category: options && options.category ? options.category : defaults.category,
+			sortBy: options && options.sortBy ? options.sortBy : defaults.sortBy
+		};
+
 		$('#segments').empty();
 
 		for (gameName in this.data) {
@@ -419,8 +431,10 @@ var goodGetter = {
 				for (categoryName in categories) {
 					if (!options.category || options.category == categoryName) {
 						var segments = categories[categoryName];
+						var segmentOrder = goodGetter.sortData({ by: options.sortBy, category: options.category, data: segments, game: options.game });
 
-						for (segmentName in segments) {
+						for (var i in segmentOrder) {
+							var segmentName = segmentOrder[i];
 							var segment = segments[segmentName];
 							var segmentPanel = new SegmentPanel({ name: segmentName, bestTime: segment.best, goalTime: segment.goal });
 
@@ -430,6 +444,122 @@ var goodGetter = {
 				}
 			}
 		}
+	},
+
+	sortData: function(options) {
+		var defaults = {
+			ascending: true,
+			by: 'name',
+			data: null
+		};
+
+		var options = {
+			ascending: options && options.ascending ? options.ascending : defaults.ascending,
+			by: options && options.by ? options.by : defaults.by,
+			data: options && options.data ? options.data : defaults.data
+		};
+
+		var localCopy = {};
+		var segmentList = [];
+
+		for (var segmentName in options.data) {
+			localCopy[segmentName] = options.data[segmentName];
+			segmentList.push(segmentName);
+		}
+
+		var sortFunction;
+
+		switch (options.by) {
+			case 'average':
+				sortFunction = function(a, b) {
+					return localCopy[b].average.overall > localCopy[a].average.overall;
+				};
+				break;
+
+			case 'best':
+				sortFunction = function(a, b) {
+					return localCopy[b].best > localCopy[a].best;
+				};
+				break;
+
+			case 'name':
+				var reA = /[^a-zA-Z]/g;
+				var reN = /[^0-9]/g;
+
+				sortFunction = function(a, b) {
+					var aA = a.replace(reA, '');
+					var bA = b.replace(reA, '');
+
+					if (aA === bA) {
+						var aN = parseInt(a.replace(reN, ''), 10);
+						var bN = parseInt(b.replace(reN, ''), 10);
+						return aN === bN ? 0 : aN > bN ? 1 : -1;
+					}
+					else {
+						return aA > bA ? 1 : -1;
+					}
+				};
+				break;
+
+			case 'practice':
+				sortFunction = function(a, b) {
+					var aScore = 0, bScore = 0;
+
+					/*
+					if (localCopy[a].average) {
+						aScore += localCopy[a].average.offAverage / localCopy[a].average.overall;
+						aScore += localCopy[a].average.offMedian / localCopy[a].average.overall;
+						aScore += localCopy[a].average.offBest / localCopy[a].average.overall;
+					}
+
+					if (localCopy[b].average) {
+						bScore += localCopy[b].average.offAverage / localCopy[b].average.overall;
+						bScore += localCopy[b].average.offMedian / localCopy[b].average.overall;
+						bScore += localCopy[b].average.offBest / localCopy[b].average.overall;
+					}
+					*/
+
+					if (localCopy[a].median && localCopy[a].best) {
+						aScore = localCopy[a].median - localCopy[a].best;
+					}
+
+					if (localCopy[b].median && localCopy[b].best) {
+						bScore = localCopy[b].median - localCopy[b].best;
+					}
+
+					return aScore < bScore;
+				};
+				break;
+
+			case 'stdev':
+				sortFunction = function(a, b) {
+					return localCopy[b].average.offAverage > localCopy[a].average.offAverage;
+				};
+				break;
+
+			case 'stdevBest':
+				sortFunction = function(a, b) {
+					return localCopy[b].average.offBest > localCopy[a].average.offBest;
+				};
+				break;
+
+			case 'stdevMedian':
+				sortFunction = function(a, b) {
+					return localCopy[b].average.offMedian > localCopy[a].average.offMedian;
+				};
+				break;
+
+			default:
+				break;
+		}
+
+		segmentList.sort(sortFunction);
+
+		if (!options.ascending) {
+			segmentList.reverse();
+		}
+
+		return segmentList;
 	},
 
 	submitSegmentTime: function(options) {
@@ -633,6 +763,56 @@ var goodGetter = {
 		else {
 			$modal.find('table.stats tr.failure td').text('--');
 		}
+	},
+
+	goof: function() {
+		var yosh = goodGetter.data['Super Mario World 2: Yoshi\'s Island']['Warpless'];
+		var sum = {
+			best: 0,
+			thirdQuartile: 0,
+			secondQuartile: 0,
+			firstQuartile: 0,
+			worst: 0
+		};
+
+		for (var segment in yosh) {
+			sum.best += yosh[segment].distribution.best;
+			sum.thirdQuartile += yosh[segment].distribution.thirdQuartile;
+			sum.secondQuartile += yosh[segment].distribution.secondQuartile;
+			sum.firstQuartile += yosh[segment].distribution.firstQuartile;
+			sum.worst += yosh[segment].distribution.worst;
+		}
+
+		sum.best = millisecondsIntoTime(sum.best);
+		sum.thirdQuartile = millisecondsIntoTime(sum.thirdQuartile);
+		sum.secondQuartile = millisecondsIntoTime(sum.secondQuartile);
+		sum.firstQuartile = millisecondsIntoTime(sum.firstQuartile);
+		sum.worst = millisecondsIntoTime(sum.worst);
+
+		console.log(sum);
+	},
+
+	goof3: function() {
+		var yosh = goodGetter.data['Super Mario World 2: Yoshi\'s Island']['Warpless'];
+		var sortedSegments = [];
+
+		for (var segment in yosh) {
+			sortedSegments.push(segment);
+		}
+
+		sortedSegments.sort(function(a, b) {
+			var aScore = 0, bScore = 0;
+
+			aScore += (yosh[a].distribution.secondQuartile - yosh[a].distribution.best);
+			aScore += (yosh[a].distribution.thirdQuartile - yosh[a].distribution.best);
+
+			bScore += (yosh[b].distribution.secondQuartile - yosh[b].distribution.best);
+			bScore += (yosh[b].distribution.thirdQuartile - yosh[b].distribution.best);
+
+			return aScore < bScore;
+		});
+
+		console.log(sortedSegments);
 	}
 };
 
