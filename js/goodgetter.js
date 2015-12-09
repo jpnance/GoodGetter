@@ -483,22 +483,34 @@ var goodGetter = {
 				break;
 
 			case 'name':
-				var reA = /[^a-zA-Z]/g;
-				var reN = /[^0-9]/g;
-
 				sortFunction = function(a, b) {
-					var aA = a.replace(reA, '');
-					var bA = b.replace(reA, '');
+					function chunkify(t) {
+						var tz = [], x = 0, y = -1, n = 0, i, j;
 
-					if (aA === bA) {
-						var aN = parseInt(a.replace(reN, ''), 10);
-						var bN = parseInt(b.replace(reN, ''), 10);
-						return aN === bN ? 0 : aN > bN ? 1 : -1;
+						while (i = (j = t.charAt(x++)).charCodeAt(0)) {
+							var m = (i == 46 || (i >= 48 && i <= 57));
+							if (m !== n) {
+								tz[++y] = '';
+								n = m;
+							}
+							tz[y] += j;
+						}
+						return tz;
 					}
-					else {
-						return aA > bA ? 1 : -1;
+
+					var aa = chunkify(a);
+					var bb = chunkify(b);
+
+					for (x = 0; aa[x] && bb[x]; x++) {
+						if (aa[x] !== bb[x]) {
+							var c = Number(aa[x]), d = Number(bb[x]);
+							if (c == aa[x] && d == bb[x]) {
+								return c - d;
+							} else return (aa[x] > bb[x]) ? 1 : -1;
+						}
 					}
-				};
+					return aa.length - bb.length;
+				}
 				break;
 
 			case 'practice':
