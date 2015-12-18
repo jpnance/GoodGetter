@@ -517,26 +517,20 @@ var goodGetter = {
 				sortFunction = function(a, b) {
 					var aScore = 0, bScore = 0;
 
-					/*
-					if (localCopy[a].average) {
-						aScore += localCopy[a].average.offAverage / localCopy[a].average.overall;
-						aScore += localCopy[a].average.offMedian / localCopy[a].average.overall;
-						aScore += localCopy[a].average.offBest / localCopy[a].average.overall;
+					if (localCopy[a].distribution) {
+						aScore = localCopy[a].distribution.firstQuartile - localCopy[a].distribution.thirdQuartile;
 					}
 
-					if (localCopy[b].average) {
-						bScore += localCopy[b].average.offAverage / localCopy[b].average.overall;
-						bScore += localCopy[b].average.offMedian / localCopy[b].average.overall;
-						bScore += localCopy[b].average.offBest / localCopy[b].average.overall;
-					}
-					*/
-
-					if (localCopy[a].median && localCopy[a].best) {
-						aScore = localCopy[a].median - localCopy[a].best;
+					if (localCopy[a].failureRate) {
+						aScore *= 1 + localCopy[a].failureRate;
 					}
 
-					if (localCopy[b].median && localCopy[b].best) {
-						bScore = localCopy[b].median - localCopy[b].best;
+					if (localCopy[b].distribution) {
+						bScore = localCopy[b].distribution.firstQuartile - localCopy[b].distribution.thirdQuartile;
+					}
+
+					if (localCopy[b].failureRate) {
+						bScore *= 1 + localCopy[b].failureRate;
 					}
 
 					return aScore < bScore;
