@@ -381,6 +381,79 @@ var goodGetter = {
 		});
 	},
 
+	computeStats: function(history) {
+		var stats = {};
+
+		var totalTime = 0;
+		var totalSuccesses = 0;
+		var totalFailures = 0;
+		var averageTime;
+		var timeVarianceOffAverage = 0;
+		var timeVarianceOffBest = 0;
+		var timeVarianceOffMedian = 0;
+
+		for (var i in history) {
+			if (history[i] == null) {
+				totalFailures++;
+			}
+			else {
+				totalSuccesses++;
+				totalTime += history[i];
+			}
+
+			if (history[i] != null && (!stats.best || history.indexOf(stats.best) == -1 || history[i] < stats.best)) {
+				//console.log('updating ' + segmentId + ' from ' + millisecondsIntoTime(segment.best) + ' to ' + millisecondsIntoTime(history[i]));
+				stats.best = history[i];
+			}
+		}
+
+		if (totalSuccesses > 0) {
+			var sortedSuccesses = [];
+
+			for (var i in history) {
+				if (history[i] != null) {
+					sortedSuccesses.push(history[i]);
+				}
+			}
+
+			sortedSuccesses.sort(function(a, b) {
+				return a < b
+			});
+
+			var middle = Math.floor(sortedSuccesses.length / 2);
+
+			averageTime = Math.round(totalTime / totalSuccesses);
+			stats.average = { overall: averageTime };
+
+			for (var i in history) {
+				if (history[i] != null) {
+					timeVarianceOffAverage += Math.pow(history[i] - stats.average.overall, 2);
+					timeVarianceOffBest += Math.pow(history[i] - stats.best, 2);
+				}
+			}
+
+			stats.average.offAverage = Math.round(Math.sqrt(timeVarianceOffAverage / totalSuccesses));
+
+			if (totalSuccesses > 1) {
+				stats.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest / (totalSuccesses - 1)));
+			}
+
+			var interval = 1 / sortedSuccesses.length;
+			stats.distribution = {
+				best: sortedSuccesses[sortedSuccesses.length - 1],
+				thirdQuartile: sortedSuccesses[Math.ceil(.75 / interval) - 1],
+				secondQuartile: sortedSuccesses[Math.ceil(.50 / interval) - 1],
+				firstQuartile: sortedSuccesses[Math.ceil(.25 / interval) - 1],
+				worst: sortedSuccesses[0]
+			};
+
+		}
+
+		stats.failureRate = totalFailures / (totalFailures + totalSuccesses);
+
+		return stats;
+	},
+
 	data: JSON.parse(localStorage.data),
 
 	init: function() {
@@ -403,6 +476,7 @@ var goodGetter = {
 		*/
 
 		$('#gameDropdown ul li:last a').click();
+		goodGetter.syncStats();
 	},
 
 	saveData: function() {
@@ -517,20 +591,44 @@ var goodGetter = {
 				sortFunction = function(a, b) {
 					var aScore = 0, bScore = 0;
 
-					if (localCopy[a].distribution) {
-						aScore = localCopy[a].distribution.firstQuartile - localCopy[a].distribution.thirdQuartile;
+					if (localCopy[a].total && localCopy[a].total.distribution) {
+						var totalScore = localCopy[a].total.distribution.firstQuartile - localCopy[a].total.distribution.thirdQuartile;
+
+						if (localCopy[a].total.failureRate) {
+							totalScore *= 1 + localCopy[a].total.failureRate;
+						}
+
+						aScore += totalScore;
 					}
 
-					if (localCopy[a].failureRate) {
-						aScore *= 1 + localCopy[a].failureRate;
+					if (localCopy[a].recent && localCopy[a].recent.distribution) {
+						var recentScore = localCopy[a].recent.distribution.firstQuartile - localCopy[a].recent.distribution.thirdQuartile;
+
+						if (localCopy[a].recent.failureRate) {
+							recentScore *= 1 + localCopy[a].recent.failureRate;
+						}
+
+						aScore += recentScore;
 					}
 
-					if (localCopy[b].distribution) {
-						bScore = localCopy[b].distribution.firstQuartile - localCopy[b].distribution.thirdQuartile;
+					if (localCopy[b].total && localCopy[b].total.distribution) {
+						var totalScore = localCopy[b].total.distribution.firstQuartile - localCopy[b].total.distribution.thirdQuartile;
+
+						if (localCopy[b].total.failureRate) {
+							totalScore *= 1 + localCopy[b].total.failureRate;
+						}
+
+						bScore += totalScore;
 					}
 
-					if (localCopy[b].failureRate) {
-						bScore *= 1 + localCopy[b].failureRate;
+					if (localCopy[b].recent && localCopy[b].recent.distribution) {
+						var recentScore = localCopy[b].recent.distribution.firstQuartile - localCopy[b].recent.distribution.thirdQuartile;
+
+						if (localCopy[b].recent.failureRate) {
+							recentScore *= 1 + localCopy[b].recent.failureRate;
+						}
+
+						bScore += recentScore;
 					}
 
 					return aScore < bScore;
@@ -546,12 +644,6 @@ var goodGetter = {
 			case 'stdevBest':
 				sortFunction = function(a, b) {
 					return localCopy[b].average.offBest > localCopy[a].average.offBest;
-				};
-				break;
-
-			case 'stdevMedian':
-				sortFunction = function(a, b) {
-					return localCopy[b].average.offMedian > localCopy[a].average.offMedian;
 				};
 				break;
 
@@ -601,89 +693,11 @@ var goodGetter = {
 					var segment = goodGetter.data[gameId][categoryId][segmentId];
 
 					if (segment.history) {
-						var totalTime = 0;
-						var totalSuccesses = 0;
-						var totalFailures = 0;
-						var averageTime;
-						var timeVarianceOffAverage = 0;
-						var timeVarianceOffBest = 0;
-						var timeVarianceOffMedian = 0;
+						var recentHistoryStartIndex = Math.max(0, segment.history.length - 20);
+						var recentHistory = segment.history.slice(recentHistoryStartIndex, Math.max(segment.history.length, recentHistoryStartIndex + 20));
 
-						for (var i in segment.history) {
-							if (segment.history[i] == null) {
-								totalFailures++;
-							}
-							else {
-								totalSuccesses++;
-								totalTime += segment.history[i];
-							}
-
-							if (segment.history[i] != null && (!segment.best || segment.history.indexOf(segment.best) == -1 || segment.history[i] < segment.best)) {
-								//console.log('updating ' + segmentId + ' from ' + millisecondsIntoTime(segment.best) + ' to ' + millisecondsIntoTime(segment.history[i]));
-								segment.best = segment.history[i];
-							}
-						}
-
-						if (totalSuccesses > 0) {
-							var sortedSuccesses = [];
-
-							for (var i in segment.history) {
-								if (segment.history[i] != null) {
-									sortedSuccesses.push(segment.history[i]);
-								}
-							}
-
-							sortedSuccesses.sort(function(a, b) {
-								return a < b
-							});
-
-							var middle = Math.floor(sortedSuccesses.length / 2);
-
-							if (sortedSuccesses.length % 2 == 0) {
-								var median = Math.round((sortedSuccesses[middle - 1] + sortedSuccesses[middle]) / 2);
-
-								segment.median = median;
-							}
-							else {
-								segment.median = sortedSuccesses[middle];
-							}
-
-							averageTime = Math.round(totalTime / totalSuccesses);
-							segment.average = { overall: averageTime };
-
-							for (var i in segment.history) {
-								if (segment.history[i] != null) {
-									timeVarianceOffAverage += Math.pow(segment.history[i] - segment.average.overall, 2);
-									timeVarianceOffBest += Math.pow(segment.history[i] - segment.best, 2);
-									timeVarianceOffMedian += Math.pow(segment.history[i] - segment.median, 2);
-								}
-							}
-
-							segment.average.offAverage = Math.round(Math.sqrt(timeVarianceOffAverage / totalSuccesses));
-
-							if (totalSuccesses > 1) {
-								segment.average.offBest = Math.round(Math.sqrt(timeVarianceOffBest / (totalSuccesses - 1)));
-							}
-
-							if (totalSuccesses % 2 == 0) {
-								segment.average.offMedian = Math.round(Math.sqrt(timeVarianceOffMedian / (totalSuccesses - 1)));
-							}
-							else {
-								segment.average.offMedian = Math.round(Math.sqrt(timeVarianceOffMedian / totalSuccesses));
-							}
-
-							var interval = 1 / sortedSuccesses.length;
-							segment.distribution = {
-								best: sortedSuccesses[sortedSuccesses.length - 1],
-								thirdQuartile: sortedSuccesses[Math.ceil(.75 / interval) - 1],
-								secondQuartile: sortedSuccesses[Math.ceil(.50 / interval) - 1],
-								firstQuartile: sortedSuccesses[Math.ceil(.25 / interval) - 1],
-								worst: sortedSuccesses[0]
-							};
-
-						}
-
-						segment.failureRate = totalFailures / (totalFailures + totalSuccesses);
+						segment.total = goodGetter.computeStats(segment.history);
+						segment.recent = goodGetter.computeStats(recentHistory);
 					}
 				}
 			}
@@ -706,68 +720,72 @@ var goodGetter = {
 
 		$modal.find('.modal-title').text(segmentName);
 
-		if (segment.distribution) {
-			$modal.find('table.distribution tr.quartiles td.best').text(millisecondsIntoTime(segment.distribution.best));
-			$modal.find('table.distribution tr.quartiles td.third-quartile').text(millisecondsIntoTime(segment.distribution.thirdQuartile));
-			$modal.find('table.distribution tr.quartiles td.second-quartile').text(millisecondsIntoTime(segment.distribution.secondQuartile));
-			$modal.find('table.distribution tr.quartiles td.first-quartile').text(millisecondsIntoTime(segment.distribution.firstQuartile));
-			$modal.find('table.distribution tr.quartiles td.worst').text(millisecondsIntoTime(segment.distribution.worst));
-		}
-		else {
-			$modal.find('table.distribution tr.quartiles td.best').text('--');
-			$modal.find('table.distribution tr.quartiles td.third-quartile').text('--');
-			$modal.find('table.distribution tr.quartiles td.second-quartile').text('--');
-			$modal.find('table.distribution tr.quartiles td.first-quartile').text('--');
-			$modal.find('table.distribution tr.quartiles td.worst').text('--');
+		$modal.find('table.distribution tr.quartiles td').text('--');
+		$modal.find('table.stats tr.best td').text('--');
+		$modal.find('table.stats tr.average td').text('--');
+		$modal.find('table.stats tr.stdev td').text('--');
+		$modal.find('table.stats tr.stdevBest td').text('--');
+		$modal.find('table.stats tr.failure td').text('--');
+
+		if (segment.total) {
+			if (segment.total.distribution) {
+				$modal.find('table.distribution tr.total.quartiles td.best').text(millisecondsIntoTime(segment.total.distribution.best));
+				$modal.find('table.distribution tr.total.quartiles td.third-quartile').text(millisecondsIntoTime(segment.total.distribution.thirdQuartile));
+				$modal.find('table.distribution tr.total.quartiles td.second-quartile').text(millisecondsIntoTime(segment.total.distribution.secondQuartile));
+				$modal.find('table.distribution tr.total.quartiles td.first-quartile').text(millisecondsIntoTime(segment.total.distribution.firstQuartile));
+				$modal.find('table.distribution tr.total.quartiles td.worst').text(millisecondsIntoTime(segment.total.distribution.worst));
+			}
+
+			if (segment.total.best) {
+				$modal.find('table.stats tr.best td.total').text(millisecondsIntoTime(segment.total.best));
+			}
+
+			if (segment.total.average && segment.total.average.overall) {
+				$modal.find('table.stats tr.average td.total').text(millisecondsIntoTime(segment.total.average.overall));
+			}
+
+			if (segment.total.average && segment.total.average.offAverage) {
+				$modal.find('table.stats tr.stdev td.total').text(millisecondsIntoTime(segment.total.average.offAverage));
+			}
+
+			if (segment.total.average && segment.total.average.offBest) {
+				$modal.find('table.stats tr.stdevBest td.total').text(millisecondsIntoTime(segment.total.average.offBest));
+			}
+
+			if (segment.total.failureRate || segment.total.failureRate == 0) {
+				$modal.find('table.stats tr.failure td.total').text(Math.round(segment.total.failureRate * 100) + '%');
+			}
 		}
 
-		if (segment.best) {
-			$modal.find('table.stats tr.best td').text(millisecondsIntoTime(segment.best));
-		}
-		else {
-			$modal.find('table.stats tr.best td').text('--');
-		}
 
-		if (segment.average && segment.average.overall) {
-			$modal.find('table.stats tr.average td').text(millisecondsIntoTime(segment.average.overall));
-		}
-		else {
-			$modal.find('table.stats tr.average td').text('--');
-		}
+		if (segment.recent) {
+			if (segment.recent.distribution) {
+				$modal.find('table.distribution tr.recent.quartiles td.best').text(millisecondsIntoTime(segment.recent.distribution.best));
+				$modal.find('table.distribution tr.recent.quartiles td.third-quartile').text(millisecondsIntoTime(segment.recent.distribution.thirdQuartile));
+				$modal.find('table.distribution tr.recent.quartiles td.second-quartile').text(millisecondsIntoTime(segment.recent.distribution.secondQuartile));
+				$modal.find('table.distribution tr.recent.quartiles td.first-quartile').text(millisecondsIntoTime(segment.recent.distribution.firstQuartile));
+				$modal.find('table.distribution tr.recent.quartiles td.worst').text(millisecondsIntoTime(segment.recent.distribution.worst));
+			}
 
-		if (segment.median) {
-			$modal.find('table.stats tr.median td').text(millisecondsIntoTime(segment.median));
-		}
-		else {
-			$modal.find('table.stats tr.median td').text('--');
-		}
+			if (segment.recent.best) {
+				$modal.find('table.stats tr.best td.recent').text(millisecondsIntoTime(segment.recent.best));
+			}
 
-		if (segment.average && segment.average.offAverage) {
-			$modal.find('table.stats tr.stdev td').text(millisecondsIntoTime(segment.average.offAverage));
-		}
-		else {
-			$modal.find('table.stats tr.stdev td').text('--');
-		}
+			if (segment.recent.average && segment.recent.average.overall) {
+				$modal.find('table.stats tr.average td.recent').text(millisecondsIntoTime(segment.recent.average.overall));
+			}
 
-		if (segment.average && segment.average.offBest) {
-			$modal.find('table.stats tr.stdevBest td').text(millisecondsIntoTime(segment.average.offBest));
-		}
-		else {
-			$modal.find('table.stats tr.stdevBest td').text('--');
-		}
+			if (segment.recent.average && segment.recent.average.offAverage) {
+				$modal.find('table.stats tr.stdev td.recent').text(millisecondsIntoTime(segment.recent.average.offAverage));
+			}
 
-		if (segment.average && segment.average.offMedian) {
-			$modal.find('table.stats tr.stdevMedian td').text(millisecondsIntoTime(segment.average.offMedian));
-		}
-		else {
-			$modal.find('table.stats tr.stdevMedian td').text('--');
-		}
+			if (segment.recent.average && segment.recent.average.offBest) {
+				$modal.find('table.stats tr.stdevBest td.recent').text(millisecondsIntoTime(segment.recent.average.offBest));
+			}
 
-		if (segment.failureRate || segment.failureRate == 0) {
-			$modal.find('table.stats tr.failure td').text(Math.round(segment.failureRate * 100) + '%');
-		}
-		else {
-			$modal.find('table.stats tr.failure td').text('--');
+			if (segment.recent.failureRate || segment.recent.failureRate == 0) {
+				$modal.find('table.stats tr.failure td.recent').text(Math.round(segment.recent.failureRate * 100) + '%');
+			}
 		}
 	},
 
@@ -796,6 +814,14 @@ var goodGetter = {
 		sum.worst = millisecondsIntoTime(sum.worst);
 
 		console.log(sum);
+	},
+
+	goof2: function() {
+		var yosh = goodGetter.data['Super Mario World 2: Yoshi\'s Island']['Warpless'];
+
+		for (var segment in yosh) {
+			console.log(segment + ': ' + yosh[segment].history.length);
+		}
 	},
 
 	goof3: function() {

@@ -10,6 +10,15 @@ div.segment-panel {
 div#segment-modal {
 }
 
+	div#segment-modal div.modal-header {
+	}
+
+		div#segment-modal div.modal-header h4.modal-title {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
 	div#segment-modal div.modal-body {
 	}
 		div#segment-modal div.modal-body div.timer {

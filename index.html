@@ -79,75 +79,82 @@
 									<button type="button" class="btn btn-success success"><span class="glyphicon glyphicon-ok"></span> Finished</button>
 									<button type="button" class="btn btn-warning reset"><span class="glyphicon glyphicon-repeat"></span> Reset</button>
 								</div>
-								<table class="table distribution">
+							</div>
+							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+								<table class="table distribution hidden-xs">
 									<thead>
 										<tr>
-											<th class="text-center" colspan="5">Percentiles</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
+											<th></th>
 											<th class="text-center">100<sup>th</sup></th>
 											<th class="text-center">75<sup>th</sup></th>
 											<th class="text-center">50<sup>th</sup></th>
 											<th class="text-center">25<sup>th</sup></th>
-											<th class="text-center">0<sup>th</sup></th>
+											<th class="text-center hidden">0<sup>th</sup></th>
 										</tr>
-										<tr class="quartiles">
+									</thead>
+									<tbody>
+										<tr class="quartiles total">
+											<th class="text-center">Overall</th>
+											<td class="text-center best">--</td>
+											<td class="text-center third-quartile">--</td>
+											<td class="text-center second-quartile">--</td>
+											<td class="text-center first-quartile">--</td>
+											<td class="text-center worst hidden">--</td>
+										</tr>
+										<tr class="quartiles recent">
+											<th class="text-center">Recent</th>
 											<td class="text-center best"></td>
-											<td class="text-center third-quartile"></td>
-											<td class="text-center second-quartile"></td>
-											<td class="text-center first-quartile"></td>
-											<td class="text-center worst"></td>
+											<td class="text-center third-quartile">--</td>
+											<td class="text-center second-quartile">--</td>
+											<td class="text-center first-quartile">--</td>
+											<td class="text-center worst hidden">--</td>
 										</tr>
 									</tbody>
 								</table>
-							</div>
-							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
 								<table class="table stats">
 									<thead>
 										<tr>
-											<th class="text-center" colspan="2">Segment Statistics</th>
+											<th></th>
+											<th class="text-right">Overall</th>
+											<th class="text-right">Recent</th>
 										</tr>
 									</thead>
 									<tbody>
 										<tr class="best">
 											<th>Best Time</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 										<tr class="average">
 											<th>Average Time</th>
-											<td class="text-right">--</td>
-										</tr>
-										<tr class="median">
-											<th>Median Time</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 										<tr class="goal hidden">
 											<th>Goal</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 										<tr class="stdev text-right">
 											<th>Standard Deviation</th>
-											<td class="text-right">--</td>
-										</tr>
-										<tr class="stdevMedian text-right hidden-xs">
-											<th>Average Off Median</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 										<tr class="stdevBest text-right hidden-xs">
 											<th>Average Behind Best</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 										<tr class="failure text-right">
 											<th>Failure Rate</th>
-											<td class="text-right">--</td>
+											<td class="text-right total">--</td>
+											<td class="text-right recent">--</td>
 										</tr>
 									</tbody>
 								</table>
 							</div>
 						</div>
-						<div class="segment-controls row text-center">
+						<div class="segment-controls row text-center hidden-xs">
 							<button type="button" class="btn btn-info previous"><span class="glyphicon glyphicon-chevron-left"></span> Previous</button>
 							<button type="button" class="btn btn-info random"><span class="glyphicon glyphicon-random"></span> Random</button>
 							<button type="button" class="btn btn-info next">Next <span class="glyphicon glyphicon-chevron-right"></span></button>
