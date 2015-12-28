@@ -25,10 +25,10 @@ SegmentPanel.prototype.toString = function() {
 	return panelString;
 };
 
-function Dropdown(id, headerValue, values) {
-	this.id = id;
-	this.headerValue = headerValue;
-	this.values = values;
+function Dropdown(options) {
+	this.id = options.id;
+	this.headerValue = options.headerValue;
+	this.values = options.values;
 }
 
 Dropdown.prototype.toString = function() {
@@ -131,7 +131,7 @@ function millisecondsIntoTime(milliseconds, explicitSign) {
 
 var goodGetter = {
 	addDropdown: function(options) {
-		var dropdown = new Dropdown(options.id, options.headerValue, options.values);
+		var dropdown = new Dropdown(options);
 
 		var $navBar = $('.navbar-nav');
 		$navBar.append($(dropdown.toString()));
