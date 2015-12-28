@@ -1,6 +1,10 @@
 notes on the modal
-stats on the modal
 undo after quit/finish (just do history.pop())
+edit history
+add game/category/segment
+color based on practice score
+sorting based on things
+star a segment
 
 define practiceable things
 start an attempt on one
@@ -29,7 +33,7 @@ levels should be able to be starred so they're often included in the warm-up rou
 ￼<12:08:15> "jpnance": yeah, i think late game practice is pretty common for people who are trying to improve a pretty hardened time and end up resetting a lot early
 ￼<12:09:31> "Crispy": honestly, in warpless I was so consistent in w1-w3 towards the end I wouldn't reset before then very often
 ￼<12:10:05> "Crispy": but that was just experience and bc i reset previously so often
-￼<12:10:55> "Crispy": being able to get multiple sub 28￼5 w2s in a row was cool
+￼<12:10:55> "Crispy": being able to get multiple sub 28:05 w2s in a row was cool
 ￼<12:11:00> "Crispy": too bad the game sucked
 ￼<12:13:23> "jpnance": what about for warm-ups? any rhyme or reason to what you guys decide to warm up with?
 ￼<12:13:50> "jpnance": i personally have a few levels that i want to make sure i warm up with just so a real run isn't the first time i see it that night
