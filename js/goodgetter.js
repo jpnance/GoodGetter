@@ -506,7 +506,7 @@ var goodGetter = {
 		return stats;
 	},
 
-	data: JSON.parse(localStorage.data),
+	data: localStorage.data ? JSON.parse(localStorage.data) : {},
 
 	init: function() {
 		goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: Object.keys(goodGetter.data) });
