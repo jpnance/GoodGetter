@@ -37,15 +37,34 @@ Dropdown.prototype.toString = function() {
 	dropdownString += '<li id="' + this.id + '" class="dropdown">';
 	dropdownString += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">' + this.headerValue + ' <span class="caret"></span></a>';
 
-	if (this.values && this.values.length > 0) {
-		dropdownString += '<ul class="dropdown-menu">';
+	dropdownString += '<ul class="dropdown-menu">';
 
+	if (this.values && this.values.length > 0) {
 		for (var i in this.values) {
-			dropdownString += '<li><a href="#">' + this.values[i] + '</a></li>';
+			dropdownString += '<li class="select"><a href="#">' + this.values[i] + '</a></li>';
 		}
 
-		dropdownString += '</ul>';
+		dropdownString += '<li role="separator" class="divider"></li>';
 	}
+
+	var dropdownType = '';
+
+	switch (this.id) {
+		case 'gameDropdown':
+			dropdownType = 'Game';
+			break;
+
+		case 'categoryDropdown':
+			dropdownType = 'Category';
+			break;
+
+		default:
+			break;
+	}
+
+	dropdownString += '<li class="add"><a href="#">Add New ' + dropdownType + '</a></li>';
+
+	dropdownString += '</ul>';
 
 	dropdownString += '</li>';
 
@@ -138,7 +157,7 @@ var goodGetter = {
 	},
 
 	bindDropdownEvents: function() {
-		$('.navbar-nav').on('click', '#gameDropdown ul li', function(e) {
+		$('.navbar-nav').on('click', '#gameDropdown ul li.select', function(e) {
 			e.preventDefault();
 
 			$('#categoryDropdown').remove();
@@ -150,15 +169,33 @@ var goodGetter = {
 			$('body').data('game', gameName);
 
 			$('#gameDropdown a.dropdown-toggle').html(gameName + ' ' + caretIcon).data('value', gameName);
-			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]) });
+			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]).sort() });
 			goodGetter.showSegmentPanels({ game: gameName });
 
-			if ($('#categoryDropdown ul.dropdown-menu li').length == 1) {
+			if ($('#categoryDropdown ul.dropdown-menu li.select').length == 1) {
 				$('#categoryDropdown ul.dropdown-menu li:first a').click();
 			}
 		});
 
-		$('.navbar-nav').on('click', '#categoryDropdown ul li', function(e) {
+		$('.navbar-nav').on('click', '#gameDropdown ul li.add', function(e) {
+			e.preventDefault();
+
+			var gameName = prompt('What\'s the name of the game?');
+
+			if (!gameName) {
+				return;
+			}
+
+			if (!goodGetter.data[gameName]) {
+				goodGetter.data[gameName] = {};
+			}
+
+			$('ul.navbar-nav').empty();
+
+			goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: goodGetter.data ? Object.keys(goodGetter.data).sort() : [] });
+		});
+
+		$('.navbar-nav').on('click', '#categoryDropdown ul li.select', function(e) {
 			e.preventDefault();
 
 			var $target = $(e.target);
@@ -170,6 +207,21 @@ var goodGetter = {
 
 			$('#categoryDropdown a.dropdown-toggle').html(categoryName + ' ' + caretIcon);
 			goodGetter.showSegmentPanels({ game: gameName, category: categoryName });
+		});
+
+		$('.navbar-nav').on('click', '#categoryDropdown ul li.add', function(e) {
+			e.preventDefault();
+
+			var gameName = $('body').data('game');
+			var categoryName = prompt('What\'s the name of the category?');
+
+			if (!goodGetter.data[gameName][categoryName]) {
+				goodGetter.data[gameName][categoryName] = {};
+			}
+
+			$('ul.navbar-nav li#categoryDropdown').remove();
+
+			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]).sort() });
 		});
 	},
 
