@@ -171,6 +171,7 @@ var goodGetter = {
 			$('#gameDropdown a.dropdown-toggle').html(gameName + ' ' + caretIcon).data('value', gameName);
 			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]).sort() });
 			goodGetter.showSegmentPanels({ game: gameName });
+			goodGetter.saveSelections({ game: gameName });
 
 			if ($('#categoryDropdown ul.dropdown-menu li.select').length == 1) {
 				$('#categoryDropdown ul.dropdown-menu li:first a').click();
@@ -207,6 +208,7 @@ var goodGetter = {
 
 			$('#categoryDropdown a.dropdown-toggle').html(categoryName + ' ' + caretIcon);
 			goodGetter.showSegmentPanels({ game: gameName, category: categoryName });
+			goodGetter.saveSelections({ game: gameName, category: categoryName });
 		});
 
 		$('.navbar-nav').on('click', '#categoryDropdown ul li.add', function(e) {
@@ -535,11 +537,34 @@ var goodGetter = {
 		*/
 
 		goodGetter.syncStats();
+		goodGetter.makeSelections(goodGetter.selections);
+	},
+
+	makeSelections: function(selections) {
+		for (var key in selections) {
+			var $dropdownItems = $('li#' + key + 'Dropdown ul.dropdown-menu li.select a');
+
+			$dropdownItems = $dropdownItems.filter(function(i, e) {
+				var $this = $(e);
+
+				return $this.text() === selections[key];
+			});
+
+			if ($dropdownItems.length == 1) {
+				$dropdownItems[0].click();
+			}
+		}
 	},
 
 	saveData: function() {
 		localStorage.data = JSON.stringify(this.data);
 	},
+
+	saveSelections: function(selections) {
+		localStorage.selections = JSON.stringify(selections);
+	},
+
+	selections: localStorage.selections ? JSON.parse(localStorage.selections) : {},
 
 	showSegmentPanels: function(options) {
 		var defaults = {
