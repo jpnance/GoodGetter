@@ -509,7 +509,7 @@ var goodGetter = {
 	data: localStorage.data ? JSON.parse(localStorage.data) : {},
 
 	init: function() {
-		goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: Object.keys(goodGetter.data) });
+		goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: goodGetter.data ? Object.keys(goodGetter.data).sort() : [] });
 		goodGetter.bindDropdownEvents();
 		goodGetter.bindKeyEvents();
 		goodGetter.bindModalEvents();
