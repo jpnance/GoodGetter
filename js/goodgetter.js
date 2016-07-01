@@ -311,6 +311,13 @@ var goodGetter = {
 			}
 			else if (!$('body').hasClass('modal-open')) {
 				switch (e.keyCode) {
+					case 69: /* ...e is for exporting your Good Getter data */
+						if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+							$('textarea#export-data').text(JSON.stringify(goodGetter.data));
+							$('#export-modal').modal();
+						}
+						break;
+
 					case 191: /* ...question mark is for going to a random segment */
 						if (e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
 							var $segmentPanels = $('#segments div.segment-panel');
