@@ -595,40 +595,40 @@ var goodGetter = {
 						var totalScore = localCopy[a].total.distribution.firstQuartile - localCopy[a].total.distribution.thirdQuartile;
 
 						if (localCopy[a].total.failureRate) {
-							totalScore *= 1 + localCopy[a].total.failureRate;
+							totalScore *= localCopy[a].total.failureRate * localCopy[a].total.distribution.secondQuartile;
 						}
 
-						aScore += totalScore;
+						aScore += 0.3 * totalScore;
 					}
 
 					if (localCopy[a].recent && localCopy[a].recent.distribution) {
 						var recentScore = localCopy[a].recent.distribution.firstQuartile - localCopy[a].recent.distribution.thirdQuartile;
 
 						if (localCopy[a].recent.failureRate) {
-							recentScore *= 1 + localCopy[a].recent.failureRate;
+							recentScore *= localCopy[a].recent.failureRate * localCopy[a].recent.distribution.secondQuartile;
 						}
 
-						aScore += recentScore;
+						aScore += 0.7 * recentScore;
 					}
 
 					if (localCopy[b].total && localCopy[b].total.distribution) {
 						var totalScore = localCopy[b].total.distribution.firstQuartile - localCopy[b].total.distribution.thirdQuartile;
 
 						if (localCopy[b].total.failureRate) {
-							totalScore *= 1 + localCopy[b].total.failureRate;
+							totalScore *= localCopy[b].total.failureRate * localCopy[b].total.distribution.secondQuartile;
 						}
 
-						bScore += totalScore;
+						bScore += 0.3 * totalScore;
 					}
 
 					if (localCopy[b].recent && localCopy[b].recent.distribution) {
 						var recentScore = localCopy[b].recent.distribution.firstQuartile - localCopy[b].recent.distribution.thirdQuartile;
 
 						if (localCopy[b].recent.failureRate) {
-							recentScore *= 1 + localCopy[b].recent.failureRate;
+							recentScore *= localCopy[b].recent.failureRate * localCopy[b].recent.distribution.secondQuartile;
 						}
 
-						bScore += recentScore;
+						bScore += 0.7 * recentScore;
 					}
 
 					return aScore < bScore;
