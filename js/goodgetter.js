@@ -527,7 +527,6 @@ var goodGetter = {
 		});
 		*/
 
-		$('#gameDropdown ul li:last a').click();
 		goodGetter.syncStats();
 	},
 
