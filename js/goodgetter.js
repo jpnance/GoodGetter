@@ -842,7 +842,10 @@ var goodGetter = {
 	},
 
 	goof: function() {
-		var yosh = goodGetter.data['Super Mario World 2: Yoshi\'s Island']['Warpless'];
+		var gameName = $('body').data('game');
+		var categoryName = $('body').data('category');
+
+		var gameCategory = goodGetter.data[gameName][categoryName];
 		var sum = {
 			best: 0,
 			thirdQuartile: 0,
@@ -851,12 +854,13 @@ var goodGetter = {
 			worst: 0
 		};
 
-		for (var segment in yosh) {
-			sum.best += yosh[segment].distribution.best;
-			sum.thirdQuartile += yosh[segment].distribution.thirdQuartile;
-			sum.secondQuartile += yosh[segment].distribution.secondQuartile;
-			sum.firstQuartile += yosh[segment].distribution.firstQuartile;
-			sum.worst += yosh[segment].distribution.worst;
+		for (var segment in gameCategory) {
+			console.log(gameCategory[segment]);
+			sum.best += gameCategory[segment].total.distribution.best;
+			sum.thirdQuartile += gameCategory[segment].total.distribution.thirdQuartile;
+			sum.secondQuartile += gameCategory[segment].total.distribution.secondQuartile;
+			sum.firstQuartile += gameCategory[segment].total.distribution.firstQuartile;
+			sum.worst += gameCategory[segment].total.distribution.worst;
 		}
 
 		sum.best = millisecondsIntoTime(sum.best);
