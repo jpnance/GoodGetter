@@ -54,8 +54,8 @@ Dropdown.prototype.toString = function() {
 			dropdownType = 'Game';
 			break;
 
-		case 'categoryDropdown':
-			dropdownType = 'Category';
+		case 'tagsDropdown':
+			dropdownType = 'Tags';
 			break;
 
 		default:
@@ -160,7 +160,7 @@ var goodGetter = {
 		$('.navbar-nav').on('click', '#gameDropdown ul li.select', function(e) {
 			e.preventDefault();
 
-			$('#categoryDropdown').remove();
+			$('#tagsDropdown').remove();
 			$('body').data('game', gameName);
 
 			var $target = $(e.target);
@@ -169,12 +169,12 @@ var goodGetter = {
 			$('body').data('game', gameName);
 
 			$('#gameDropdown a.dropdown-toggle').html(gameName + ' ' + caretIcon).data('value', gameName);
-			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]).sort() });
+			goodGetter.addDropdown({ id: 'tagsDropdown', headerValue: 'Pick Some Tags', values: goodGetter.data[gameName].tags.sort() });
 			goodGetter.showSegmentPanels({ game: gameName });
 			goodGetter.saveSelections({ game: gameName });
 
-			if ($('#categoryDropdown ul.dropdown-menu li.select').length == 1) {
-				$('#categoryDropdown ul.dropdown-menu li:first a').click();
+			if ($('#tagsDropdown ul.dropdown-menu li.select').length == 1) {
+				$('#tagsDropdown ul.dropdown-menu li:first a').click();
 			}
 		});
 
@@ -196,34 +196,34 @@ var goodGetter = {
 			goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: goodGetter.data ? Object.keys(goodGetter.data).sort() : [] });
 		});
 
-		$('.navbar-nav').on('click', '#categoryDropdown ul li.select', function(e) {
+		$('.navbar-nav').on('click', '#tagsDropdown ul li.select', function(e) {
 			e.preventDefault();
 
 			var $target = $(e.target);
-			var categoryName = $target.html();
+			var tagsName = $target.html();
 			var gameName = $('body').data('game');
 
 			$('body').data('game', gameName);
-			$('body').data('category', categoryName);
+			$('body').data('tags', tagsName);
 
-			$('#categoryDropdown a.dropdown-toggle').html(categoryName + ' ' + caretIcon);
-			goodGetter.showSegmentPanels({ game: gameName, category: categoryName });
-			goodGetter.saveSelections({ game: gameName, category: categoryName });
+			$('#tagsDropdown a.dropdown-toggle').html(tagsName + ' ' + caretIcon);
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.saveSelections({ game: gameName, tags: tagsName });
 		});
 
-		$('.navbar-nav').on('click', '#categoryDropdown ul li.add', function(e) {
+		$('.navbar-nav').on('click', '#tagsDropdown ul li.add', function(e) {
 			e.preventDefault();
 
 			var gameName = $('body').data('game');
-			var categoryName = prompt('What\'s the name of the category?');
+			var tagsName = prompt('What\'s the name of the tags?');
 
-			if (!goodGetter.data[gameName][categoryName]) {
-				goodGetter.data[gameName][categoryName] = {};
+			if (tagsName && goodGetter.data[gameName].tags.indexOf(tagsName) == -1) {
+				goodGetter.data[gameName].tags.push(tagsName);
 			}
 
-			$('ul.navbar-nav li#categoryDropdown').remove();
+			$('ul.navbar-nav li#tagsDropdown').remove();
 
-			goodGetter.addDropdown({ id: 'categoryDropdown', headerValue: 'Pick a Category', values: Object.keys(goodGetter.data[gameName]).sort() });
+			goodGetter.addDropdown({ id: 'tagsDropdown', headerValue: 'Pick Some Tags', values: goodGetter.data[gameName].tags.sort() });
 		});
 	},
 
@@ -383,6 +383,52 @@ var goodGetter = {
 			goodGetter.saveData();
 			goodGetter.updateModal();
 			$('#segment-modal button.reset').click();
+		});
+
+		$('#segment-modal').on('click', '.tag.inactive', function(e) {
+			var $this = $(e.target);
+			var gameName = $('body').data('game');
+			var tagsName = $('body').data('tags');
+			var segmentName = $('body').data('segment');
+			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
+
+			segmentTags.push($this.text());
+			goodGetter.saveData();
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.updateModal();
+		});
+
+		$('#segment-modal').on('click', '.tag.active', function(e) {
+			var $this = $(e.target);
+			var gameName = $('body').data('game');
+			var tagsName = $('body').data('tags');
+			var segmentName = $('body').data('segment');
+			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
+
+			segmentTags.splice(segmentTags.indexOf($this.text()), 1);
+			goodGetter.saveData();
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.updateModal();
+		});
+
+		$('#segment-modal').on('click', '.tag.add', function(e) {
+			var $this = $(e.target);
+			var gameName = $('body').data('game');
+			var tagsName = $('body').data('tags');
+			var segmentName = $('body').data('segment');
+			var gameTags = goodGetter.data[gameName].tags;
+			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
+
+			var newTag = prompt('What should the tag be called?');
+
+			if (newTag && gameTags.indexOf(newTag) == -1) {
+				gameTags.push(newTag);
+				segmentTags.push(newTag);
+			}
+
+			goodGetter.saveData();
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.updateModal();
 		});
 
 		$('#segment-modal').on('click', '.btn.previous', function(e) {
@@ -569,35 +615,45 @@ var goodGetter = {
 	showSegmentPanels: function(options) {
 		var defaults = {
 			game: $('body').data('game'),
-			category: $('body').data('category'),
+			tags: $('body').data('tags'),
 			sortBy: 'practice'
 		};
 
 		var options = {
 			game: options && options.game ? options.game : defaults.game,
-			category: options && options.category ? options.category : defaults.category,
+			tags: options && options.tags ? options.tags : defaults.tags,
 			sortBy: options && options.sortBy ? options.sortBy : defaults.sortBy
 		};
 
 		$('#segments').empty();
 
+		var selectedSegments = {};
+
 		for (gameName in this.data) {
 			if (gameName == options.game) {
-				var categories = this.data[gameName];
+				var segments = this.data[gameName].segments;
+				var tags = this.data[gameName].tags;
 
-				for (categoryName in categories) {
-					if (!options.category || options.category == categoryName) {
-						var segments = categories[categoryName];
-						var segmentOrder = goodGetter.sortData({ by: options.sortBy, category: options.category, data: segments, game: options.game });
+				for (var segmentName in segments) {
+					var segment = segments[segmentName];
 
-						for (var i in segmentOrder) {
-							var segmentName = segmentOrder[i];
-							var segment = segments[segmentName];
-							var segmentPanel = new SegmentPanel({ name: segmentName, bestTime: segment.best, goalTime: segment.goal });
+					for (var segmentTagId in segment.tags) {
+						var tag = segment.tags[segmentTagId];
 
-							$('#segments').append($(segmentPanel.toString()));
+						if (tag == options.tags) {
+							selectedSegments[segmentName] = segment;
 						}
 					}
+				}
+
+				var segmentOrder = goodGetter.sortData({ by: options.sortBy, category: options.category, data: selectedSegments, game: options.game });
+
+				for (var i in segmentOrder) {
+					var segmentName = segmentOrder[i];
+					var segment = segments[segmentName];
+
+					var segmentPanel = new SegmentPanel({ name: segmentName, bestTime: segment.best, goalTime: segment.goal });
+					$('#segments').append($(segmentPanel.toString()));
 				}
 			}
 		}
@@ -746,42 +802,40 @@ var goodGetter = {
 	submitSegmentTime: function(options) {
 		var defaults = {
 			game: $('body').data('game'),
-			category: $('body').data('category'),
+			tags: $('body').data('tags'),
 			segment: $('body').data('segment')
 		};
 
 		var options = {
 			game: options.game ? options.game : defaults.game,
-			category: options.category ? options.category : defaults.category,
+			tags: options.tags ? options.tags : defaults.tags,
 			segment: options.segment ? options.segment : defaults.segment,
 			time: options.time
 		};
 
 		var game = options.game;
-		var category = options.category;
+		var tags = options.tags;
 		var segment = options.segment;
 		var time = options.time;
 
-		if (!this.data[game][category][segment].history) {
-			this.data[game][category][segment].history = [];
+		if (!this.data[game].segments[segment].history) {
+			this.data[game].segments[segment].history = [];
 		}
 
-		this.data[game][category][segment].history.push(time);
+		this.data[game].segments[segment].history.push(time);
 	},
 
 	syncStats: function() {
 		for (var gameId in goodGetter.data) {
-			for (var categoryId in goodGetter.data[gameId]) {
-				for (var segmentId in goodGetter.data[gameId][categoryId]) {
-					var segment = goodGetter.data[gameId][categoryId][segmentId];
+			for (var segmentId in goodGetter.data[gameId].segments) {
+				var segment = goodGetter.data[gameId].segments[segmentId];
 
-					if (segment.history) {
-						var recentHistoryStartIndex = Math.max(0, segment.history.length - 20);
-						var recentHistory = segment.history.slice(recentHistoryStartIndex, Math.max(segment.history.length, recentHistoryStartIndex + 20));
+				if (segment.history) {
+					var recentHistoryStartIndex = Math.max(0, segment.history.length - 20);
+					var recentHistory = segment.history.slice(recentHistoryStartIndex, Math.max(segment.history.length, recentHistoryStartIndex + 20));
 
-						segment.total = goodGetter.computeStats(segment.history);
-						segment.recent = goodGetter.computeStats(recentHistory);
-					}
+					segment.total = goodGetter.computeStats(segment.history);
+					segment.recent = goodGetter.computeStats(recentHistory);
 				}
 			}
 		}
@@ -795,10 +849,11 @@ var goodGetter = {
 
 	updateModal: function() {
 		var gameName = $('body').data('game');
-		var categoryName = $('body').data('category');
 		var segmentName = $('body').data('segment');
 
-		var segment = goodGetter.data[gameName][categoryName][segmentName];
+		var gameTags = goodGetter.data[gameName].tags;
+		var segment = goodGetter.data[gameName].segments[segmentName];
+		var segmentTags = segment.tags;
 		var $modal = $('#segment-modal');
 
 		$modal.find('.modal-title').text(segmentName);
@@ -809,6 +864,18 @@ var goodGetter = {
 		$modal.find('table.stats tr.stdev td').text('--');
 		$modal.find('table.stats tr.stdevBest td').text('--');
 		$modal.find('table.stats tr.failure td').text('--');
+		$modal.find('div.tags').empty();
+
+		for (var i in gameTags) {
+			if (segmentTags.indexOf(gameTags[i]) == -1) {
+				$modal.find('div.tags').append($('<button type="button" class="tag inactive btn btn-default btn-xs">' + gameTags[i] + '</button>'));
+			}
+			else {
+				$modal.find('div.tags').append($('<button type="button" class="tag active btn btn-primary btn-xs">' + gameTags[i] + '</button>'));
+			}
+		}
+
+		$modal.find('div.tags').append($('<button type="button" class="tag add btn btn-link btn-xs">+</button>'));
 
 		if (segment.total) {
 			if (segment.total.distribution) {
@@ -874,9 +941,12 @@ var goodGetter = {
 
 	goof: function() {
 		var gameName = $('body').data('game');
-		var categoryName = $('body').data('category');
+		var tagsName = $('body').data('tags');
 
-		var gameCategory = goodGetter.data[gameName][categoryName];
+		var segments = Object.values(goodGetter.data[gameName].segments).filter(function(e) {
+			return e.tags.indexOf(tagsName) > -1;
+		});
+
 		var sum = {
 			best: 0,
 			thirdQuartile: 0,
@@ -885,13 +955,12 @@ var goodGetter = {
 			worst: 0
 		};
 
-		for (var segment in gameCategory) {
-			console.log(gameCategory[segment]);
-			sum.best += gameCategory[segment].total.distribution.best;
-			sum.thirdQuartile += gameCategory[segment].total.distribution.thirdQuartile;
-			sum.secondQuartile += gameCategory[segment].total.distribution.secondQuartile;
-			sum.firstQuartile += gameCategory[segment].total.distribution.firstQuartile;
-			sum.worst += gameCategory[segment].total.distribution.worst;
+		for (var segment in segments) {
+			sum.best += segments[segment].total.distribution.best;
+			sum.thirdQuartile += segments[segment].total.distribution.thirdQuartile;
+			sum.secondQuartile += segments[segment].total.distribution.secondQuartile;
+			sum.firstQuartile += segments[segment].total.distribution.firstQuartile;
+			sum.worst += segments[segment].total.distribution.worst;
 		}
 
 		sum.best = millisecondsIntoTime(sum.best);
@@ -932,6 +1001,40 @@ var goodGetter = {
 		});
 
 		console.log(sortedSegments);
+	},
+
+	convert: function() {
+		/*
+			Super Mario 64: {
+				segments: [ 'BOB: 1', 'WF: 2', ... ]
+				tags: [ '70-Star', 'Bowser', '100-Coin', ... ]
+			}
+		*/
+
+		var data = goodGetter.data;
+		var newData = {};
+
+		for (var game in goodGetter.data) {
+			var gameData = goodGetter.data[game];
+
+			newData[game] = { segments: {}, tags: [] };
+
+			for (var tags in gameData) {
+				var tagsData = gameData[tags];
+
+				newData[game].tags.push(tags);
+
+				for (var id in tagsData) {
+					var segment = tagsData[id];
+					segment.tags = [ tags ];
+
+					newData[game].segments[id] = segment;
+				}
+			}
+		}
+
+		goodGetter.data = newData;
+		goodGetter.saveData();
 	}
 };
 
