@@ -188,12 +188,15 @@ var goodGetter = {
 			}
 
 			if (!goodGetter.data[gameName]) {
-				goodGetter.data[gameName] = {};
+				goodGetter.data[gameName] = { segments: {}, tags: [] };
+				goodGetter.saveData();
 			}
 
 			$('ul.navbar-nav').empty();
 
 			goodGetter.addDropdown({ id: 'gameDropdown', headerValue: 'Pick a Game', values: goodGetter.data ? Object.keys(goodGetter.data).sort() : [] });
+			goodGetter.saveSelections({ game: gameName });
+			goodGetter.makeSelections({ game: gameName });
 		});
 
 		$('.navbar-nav').on('click', '#tagsDropdown ul li.select', function(e) {
@@ -219,11 +222,14 @@ var goodGetter = {
 
 			if (tagsName && goodGetter.data[gameName].tags.indexOf(tagsName) == -1) {
 				goodGetter.data[gameName].tags.push(tagsName);
+				goodGetter.saveData();
 			}
 
 			$('ul.navbar-nav li#tagsDropdown').remove();
 
 			goodGetter.addDropdown({ id: 'tagsDropdown', headerValue: 'Pick Some Tags', values: goodGetter.data[gameName].tags.sort() });
+			goodGetter.saveSelections({ game: gameName, tags: tagsName });
+			goodGetter.makeSelections({ game: gameName, tags: tagsName });
 		});
 	},
 
@@ -313,6 +319,28 @@ var goodGetter = {
 			}
 			else if (!$('body').hasClass('modal-open')) {
 				switch (e.keyCode) {
+					case 65: /* ...a is for adding a segment to the current game */
+						if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+							e.preventDefault();
+
+							var gameName = $('body').data('game');
+							var tagsName = $('body').data('tags');
+							var segmentName = prompt('What\'s the name of the segment?');
+
+							if (segmentName && Object.keys(goodGetter.data[gameName].segments).indexOf(segmentName) == -1) {
+								goodGetter.data[gameName].segments[segmentName] = {};
+
+								if (tagsName) {
+									goodGetter.data[gameName].segments[segmentName].tags = [ tagsName ];
+								}
+
+								goodGetter.saveData();
+								goodGetter.saveSelections({ game: gameName, tags: tagsName });
+								goodGetter.makeSelections({ game: gameName, tags: tagsName });
+							}
+						}
+						break;
+
 					case 69: /* ...e is for exporting your Good Getter data */
 						if (!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
 							$('textarea#export-data').text(JSON.stringify(goodGetter.data));
@@ -616,7 +644,7 @@ var goodGetter = {
 		var defaults = {
 			game: $('body').data('game'),
 			tags: $('body').data('tags'),
-			sortBy: 'practice'
+			sortBy: 'name'
 		};
 
 		var options = {
