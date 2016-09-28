@@ -220,7 +220,7 @@ var goodGetter = {
 			$('body').data('tags', tagsName);
 
 			$('#tagsDropdown a.dropdown-toggle').html(tagsName + ' ' + caretIcon);
-			goodGetter.addDropdown({ id: 'sortDropdown', headerValue: 'Sort By', values: [ 'Name', 'Failure Rate', 'Needs Practice' ] });
+			goodGetter.addDropdown({ id: 'sortDropdown', headerValue: 'Sort By', values: [ 'Name', 'Failure Rate', 'Needs Practice', 'Average Behind Best' ] });
 			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
 			goodGetter.saveSelections({ game: gameName, tags: tagsName });
 		});
@@ -842,15 +842,21 @@ var goodGetter = {
 				};
 				break;
 
-			case 'stdevBest':
+			case 'Average Behind Best':
 				sortFunction = function(a, b) {
-					return localCopy[b].average.offBest > localCopy[a].average.offBest;
+					return localCopy[b].total.average.offBest > localCopy[a].total.average.offBest;
 				};
 				break;
 
 			case 'Failure Rate':
 				sortFunction = function(a, b) {
 					return localCopy[b].total.failureRate > localCopy[a].total.failureRate;
+				};
+				break;
+
+			case 'Test':
+				sortFunction = function(a, b) {
+					return (localCopy[b].total.average.offAverage / localCopy[b].total.best) > (localCopy[a].total.average.offAverage / localCopy[a].total.best);
 				};
 				break;
 
