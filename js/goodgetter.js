@@ -33,20 +33,6 @@ function Dropdown(options) {
 
 Dropdown.prototype.toString = function() {
 	var dropdownString = '';
-
-	dropdownString += '<li id="' + this.id + '" class="dropdown">';
-	dropdownString += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">' + this.headerValue + ' <span class="caret"></span></a>';
-
-	dropdownString += '<ul class="dropdown-menu">';
-
-	if (this.values && this.values.length > 0) {
-		for (var i in this.values) {
-			dropdownString += '<li class="select"><a href="#">' + this.values[i] + '</a></li>';
-		}
-
-		dropdownString += '<li role="separator" class="divider"></li>';
-	}
-
 	var dropdownType = '';
 
 	switch (this.id) {
@@ -58,11 +44,32 @@ Dropdown.prototype.toString = function() {
 			dropdownType = 'Tags';
 			break;
 
+		case 'sortDropdown':
+			dropdownType = 'Sort';
+			break;
+
 		default:
 			break;
 	}
 
-	dropdownString += '<li class="add"><a href="#">Add New ' + dropdownType + '</a></li>';
+	dropdownString += '<li id="' + this.id + '" class="dropdown">';
+	dropdownString += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">' + this.headerValue + ' <span class="caret"></span></a>';
+
+	dropdownString += '<ul class="dropdown-menu">';
+
+	if (this.values && this.values.length > 0) {
+		for (var i in this.values) {
+			dropdownString += '<li class="select"><a href="#">' + this.values[i] + '</a></li>';
+		}
+
+		if (dropdownType == 'Game' || dropdownType == 'Tags') {
+			dropdownString += '<li role="separator" class="divider"></li>';
+		}
+	}
+
+	if (dropdownType == 'Game' || dropdownType == 'Tags') {
+		dropdownString += '<li class="add"><a href="#">Add New ' + dropdownType + '</a></li>';
+	}
 
 	dropdownString += '</ul>';
 
@@ -161,6 +168,7 @@ var goodGetter = {
 			e.preventDefault();
 
 			$('#tagsDropdown').remove();
+			$('#sortDropdown').remove();
 			$('body').data('game', gameName);
 
 			var $target = $(e.target);
@@ -202,6 +210,8 @@ var goodGetter = {
 		$('.navbar-nav').on('click', '#tagsDropdown ul li.select', function(e) {
 			e.preventDefault();
 
+			$('#sortDropdown').remove();
+
 			var $target = $(e.target);
 			var tagsName = $target.html();
 			var gameName = $('body').data('game');
@@ -210,6 +220,7 @@ var goodGetter = {
 			$('body').data('tags', tagsName);
 
 			$('#tagsDropdown a.dropdown-toggle').html(tagsName + ' ' + caretIcon);
+			goodGetter.addDropdown({ id: 'sortDropdown', headerValue: 'Sort By', values: [ 'Name', 'Failure Rate', 'Needs Practice' ] });
 			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
 			goodGetter.saveSelections({ game: gameName, tags: tagsName });
 		});
@@ -218,7 +229,7 @@ var goodGetter = {
 			e.preventDefault();
 
 			var gameName = $('body').data('game');
-			var tagsName = prompt('What\'s the name of the tags?');
+			var tagsName = prompt('What\'s the name of the tag?');
 
 			if (tagsName && goodGetter.data[gameName].tags.indexOf(tagsName) == -1) {
 				goodGetter.data[gameName].tags.push(tagsName);
@@ -227,9 +238,26 @@ var goodGetter = {
 
 			$('ul.navbar-nav li#tagsDropdown').remove();
 
-			goodGetter.addDropdown({ id: 'tagsDropdown', headerValue: 'Pick Some Tags', values: goodGetter.data[gameName].tags.sort() });
+			goodGetter.addDropdown({ id: 'tagsDropdown', headerValue: 'Pick a Tag', values: goodGetter.data[gameName].tags.sort() });
 			goodGetter.saveSelections({ game: gameName, tags: tagsName });
 			goodGetter.makeSelections({ game: gameName, tags: tagsName });
+		});
+
+		$('.navbar-nav').on('click', '#sortDropdown ul li.select', function(e) {
+			e.preventDefault();
+
+			var $target = $(e.target);
+			var sortName = $target.html();
+			var gameName = $('body').data('game');
+			var tagsName = $('body').data('tags');
+
+			$('body').data('game', gameName);
+			$('body').data('tags', tagsName);
+			$('body').data('sort', sortName);
+
+			$('#sortDropdown a.dropdown-toggle').html(sortName + ' ' + caretIcon);
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName, sort: sortName });
+			goodGetter.saveSelections({ game: gameName, tags: tagsName, sort: sortName });
 		});
 	},
 
@@ -325,6 +353,7 @@ var goodGetter = {
 
 							var gameName = $('body').data('game');
 							var tagsName = $('body').data('tags');
+							var sortName = $('body').data('sort');
 							var segmentName = prompt('What\'s the name of the segment?');
 
 							if (segmentName && Object.keys(goodGetter.data[gameName].segments).indexOf(segmentName) == -1) {
@@ -335,8 +364,8 @@ var goodGetter = {
 								}
 
 								goodGetter.saveData();
-								goodGetter.saveSelections({ game: gameName, tags: tagsName });
-								goodGetter.makeSelections({ game: gameName, tags: tagsName });
+								goodGetter.saveSelections({ game: gameName, tags: tagsName, sort: sortName });
+								goodGetter.makeSelections({ game: gameName, tags: tagsName, sort: sortName });
 							}
 						}
 						break;
@@ -417,12 +446,13 @@ var goodGetter = {
 			var $this = $(e.target);
 			var gameName = $('body').data('game');
 			var tagsName = $('body').data('tags');
+			var sortName = $('body').data('sort');
 			var segmentName = $('body').data('segment');
 			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
 
 			segmentTags.push($this.text());
 			goodGetter.saveData();
-			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName, sort: sortName });
 			goodGetter.updateModal();
 		});
 
@@ -430,12 +460,13 @@ var goodGetter = {
 			var $this = $(e.target);
 			var gameName = $('body').data('game');
 			var tagsName = $('body').data('tags');
+			var sortName = $('body').data('sort');
 			var segmentName = $('body').data('segment');
 			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
 
 			segmentTags.splice(segmentTags.indexOf($this.text()), 1);
 			goodGetter.saveData();
-			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName, sort: sortName });
 			goodGetter.updateModal();
 		});
 
@@ -443,6 +474,7 @@ var goodGetter = {
 			var $this = $(e.target);
 			var gameName = $('body').data('game');
 			var tagsName = $('body').data('tags');
+			var sortName = $('body').data('sort');
 			var segmentName = $('body').data('segment');
 			var gameTags = goodGetter.data[gameName].tags;
 			var segmentTags = goodGetter.data[gameName].segments[segmentName].tags;
@@ -455,7 +487,7 @@ var goodGetter = {
 			}
 
 			goodGetter.saveData();
-			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName });
+			goodGetter.showSegmentPanels({ game: gameName, tags: tagsName, sort: sortName });
 			goodGetter.updateModal();
 		});
 
@@ -646,13 +678,13 @@ var goodGetter = {
 		var defaults = {
 			game: $('body').data('game'),
 			tags: $('body').data('tags'),
-			sortBy: 'name'
+			sort: 'name'
 		};
 
 		var options = {
 			game: options && options.game ? options.game : defaults.game,
 			tags: options && options.tags ? options.tags : defaults.tags,
-			sortBy: options && options.sortBy ? options.sortBy : defaults.sortBy
+			sort: options && options.sort ? options.sort : defaults.sort
 		};
 
 		$('#segments').empty();
@@ -676,7 +708,7 @@ var goodGetter = {
 					}
 				}
 
-				var segmentOrder = goodGetter.sortData({ by: options.sortBy, category: options.category, data: selectedSegments, game: options.game });
+				var segmentOrder = goodGetter.sortData({ by: options.sort, category: options.category, data: selectedSegments, game: options.game });
 
 				for (var i in segmentOrder) {
 					var segmentName = segmentOrder[i];
@@ -725,7 +757,7 @@ var goodGetter = {
 				};
 				break;
 
-			case 'name':
+			case 'Name':
 				sortFunction = function(a, b) {
 					function chunkify(t) {
 						var tz = [], x = 0, y = -1, n = 0, i, j;
@@ -756,7 +788,7 @@ var goodGetter = {
 				}
 				break;
 
-			case 'practice':
+			case 'Needs Practice':
 				sortFunction = function(a, b) {
 					var aScore = 0, bScore = 0;
 
@@ -813,6 +845,12 @@ var goodGetter = {
 			case 'stdevBest':
 				sortFunction = function(a, b) {
 					return localCopy[b].average.offBest > localCopy[a].average.offBest;
+				};
+				break;
+
+			case 'Failure Rate':
+				sortFunction = function(a, b) {
+					return localCopy[b].total.failureRate > localCopy[a].total.failureRate;
 				};
 				break;
 
