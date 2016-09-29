@@ -788,7 +788,7 @@ var goodGetter = {
 				}
 				break;
 
-			case 'Needs Practice':
+			case 'Needs Practice (old)':
 				sortFunction = function(a, b) {
 					var aScore = 0, bScore = 0;
 
@@ -854,9 +854,27 @@ var goodGetter = {
 				};
 				break;
 
-			case 'Test':
+			case 'Needs Practice':
 				sortFunction = function(a, b) {
-					return (localCopy[b].total.average.offAverage / localCopy[b].total.best) > (localCopy[a].total.average.offAverage / localCopy[a].total.best);
+					var aScore = 0, bScore = 0;
+
+					if (localCopy[a].total && localCopy[a].recent) {
+						var totalScore = localCopy[a].total.average.offAverage + localCopy[a].total.average.offBest + (localCopy[a].total.average.overall * localCopy[a].total.failureRate);
+						var recentScore = localCopy[a].recent.average.offAverage + localCopy[a].recent.average.offBest + (localCopy[a].recent.average.overall * localCopy[a].recent.failureRate);
+
+						aScore = (0.75 * recentScore) + (0.25 * totalScore);
+					}
+
+					if (localCopy[b].total && localCopy[b].recent) {
+						var totalScore = localCopy[b].total.average.offAverage + localCopy[b].total.average.offBest + (localCopy[b].total.average.overall * localCopy[b].total.failureRate);
+						var recentScore = localCopy[b].recent.average.offAverage + localCopy[b].recent.average.offBest + (localCopy[b].recent.average.overall * localCopy[b].recent.failureRate);
+
+						bScore = (0.75 * recentScore) + (0.25 * totalScore);
+					}
+
+					return bScore > aScore;
+
+					//return (localCopy[b].total.average.offAverage / localCopy[b].total.best) > (localCopy[a].total.average.offAverage / localCopy[a].total.best);
 				};
 				break;
 
