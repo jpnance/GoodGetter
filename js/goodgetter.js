@@ -290,6 +290,13 @@ var goodGetter = {
 							}
 							break;
 
+						case 85: /* ...u is for undoing the last action */
+							if (!e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+								e.preventDefault();
+								$('#segment-modal div.timer-controls .btn.undo').click();
+							}
+							break;
+
 						case 191: /* ...question mark is for going to a random segment */
 							if (e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
 								e.preventDefault();
@@ -402,6 +409,9 @@ var goodGetter = {
 		});
 
 		$('#segment-modal').on('click', '.btn.start', function(e) {
+			delete goodGetter.lastAction;
+			delete goodGetter.lastWriteAction;
+
 			goodGetter.timer.started = Date.now();
 
 			clearInterval(goodGetter.timer.timerInterval);
@@ -422,11 +432,13 @@ var goodGetter = {
 		});
 
 		$('#segment-modal').on('click', '.btn.reset', function(e) {
+			goodGetter.lastAction = 'reset';
 			$('#segment-modal div.timer').html('0.00');
 			$('#segment-modal .modal-body .timer-controls').removeClass('stopped').addClass('reset');
 		});
 
 		$('#segment-modal').on('click', '.btn.success', function(e) {
+			goodGetter.lastWriteAction = 'success';
 			goodGetter.submitSegmentTime({ time: goodGetter.timer.stopped - goodGetter.timer.started });
 			goodGetter.syncStats();
 			goodGetter.saveData();
@@ -435,11 +447,29 @@ var goodGetter = {
 		});
 
 		$('#segment-modal').on('click', '.btn.failure', function(e) {
+			goodGetter.lastWriteAction = 'failure';
 			goodGetter.submitSegmentTime({ time: null });
 			goodGetter.syncStats();
 			goodGetter.saveData();
 			goodGetter.updateModal();
 			$('#segment-modal button.reset').click();
+		});
+
+		$('#segment-modal').on('click', '.btn.undo', function(e) {
+			if (goodGetter.lastWriteAction == 'success' || goodGetter.lastWriteAction == 'failure') {
+				goodGetter.popSegmentTime({});
+				goodGetter.syncStats();
+				goodGetter.saveData();
+				goodGetter.updateModal();
+				$('#segment-modal div.timer').html(millisecondsIntoTime(goodGetter.timer.stopped - goodGetter.timer.started));
+				$('#segment-modal .modal-body .timer-controls').removeClass('reset').addClass('stopped');
+			}
+			else if (goodGetter.lastAction == 'reset') {
+				$('#segment-modal div.timer').html(millisecondsIntoTime(goodGetter.timer.stopped - goodGetter.timer.started));
+				$('#segment-modal .modal-body .timer-controls').removeClass('reset').addClass('stopped');
+			}
+
+			delete goodGetter.lastWriteAction;
 		});
 
 		$('#segment-modal').on('click', '.tag.inactive', function(e) {
@@ -662,6 +692,31 @@ var goodGetter = {
 				$dropdownItems[0].click();
 			}
 		}
+	},
+
+	popSegmentTime: function(options) {
+		var defaults = {
+			game: $('body').data('game'),
+			tags: $('body').data('tags'),
+			segment: $('body').data('segment')
+		};
+
+		var options = {
+			game: options.game ? options.game : defaults.game,
+			tags: options.tags ? options.tags : defaults.tags,
+			segment: options.segment ? options.segment : defaults.segment,
+			time: options.time
+		};
+
+		var game = options.game;
+		var tags = options.tags;
+		var segment = options.segment;
+		var time = options.time;
+
+		if (this.data[game].segments[segment].history) {
+			this.data[game].segments[segment].history.pop();
+		}
+
 	},
 
 	saveData: function() {
